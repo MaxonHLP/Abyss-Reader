@@ -1,0 +1,165 @@
+@import "tailwindcss";
+
+@theme {
+  /*login*/
+  --color-abyss-bg-nav: #0A5571;
+  --color-abyss-bg-png:#017C98;
+  --color-abyss-bg-log: #53B0AA;
+  --color-abyss-text-log: #014660;
+  --color-abyss-text-muted:#003E51;
+  --color-abyss-bg-input:#1A6A89;
+  --color-abyss-text-input:#5DD5CD;
+  --color-abyss-border-input:#014660;
+
+  /*Vista Master*/
+    --color-abyss-bg-Master:#025C70;
+    --color-abyss-text-title-Master:#33BDE0;
+
+    /*Button seccion grupos-caracteristicas */
+    --color-abyss-bg-button-on-sec-master:#029797;
+    --color-abyss-bg-button-off-sec-master:#037571;
+    --color-abyss-text-button-on-sec-master:#005069;
+    --color-abyss-text-button-off-sec-master:#00403D;
+    --color-abyss-border-button-on-sec-master:#005069;
+   
+
+    /* card grupo */
+    --color-abyss-bg-card-gp:#017C98;
+    --color-abyss-text-card-gp:#014660;
+    --color-abyss-bg-text-card-gp:#009F97;/*65%*/
+    --color-abyss-border-card-gp:#00A89D;
+
+    /* card crear grupo */
+    --color-abyss-bg-card-crear-gp:#00838F;
+    --color-abyss-text-card-crear-gp:#003E51;
+    --color-abyss-bg-text-card-crear-gp:#009F97;
+    --color-abyss-border-card-crear-gp:#005859;
+    
+    /* select caracts*/
+    --color-abyss-bg-select-sec-master:#008C86;
+    --color-abyss-border-select-sec-master:#003E51;
+    --color-abyss-text-select-sec-master:#014660;
+    /*item select*/
+    --color-abyss-bg-item-select:#005E83;
+    --color-abyss-text-item-select:#0FBAF9;
+    --color-abyss-border-item-select:#014660;
+    /* boton crear caract*/
+    --color-abyss-bg-button-create-caract:#1A6A89;
+    --color-abyss-text-button-create-caract:#25F7E9;
+    --color-abyss-border-button-create-caract:#004761;
+    /*form crear*/
+    --color-abyss-filter-form-crear:#1A6A89;/*50%*/
+    --color-abyss-text-titles-form-crear:#014660;
+    --color-abyss-bg-form-crear:#53B0AA;
+    --color-abyss-bg-input-form-crear:#008C86;
+    --color-abyss-text-input-form-crear:#5DD5CD;/*70%*/
+    --color-abyss-border-input-form-crear:#014660;
+      /*confirm y cancel button*/
+      --color-abyss-coment-cc:#014660;
+      --color-abyss-bg-button-cc:#008C86;
+      --color-abyss-text-button-cc:#26F6E9;
+      --color-abyss-border-button-cc:#005859;
+  /*vista busqueda */
+    --color-abyss-bg-barra-busqueda:#1A6A89;
+    --color-abyss-text-barra-busqueda:#00EBDB;
+    --color-abyss-bg-selecs:#014660;
+    --color-abyss-title-selecs:#00A89D;/*filtros generales , generos*/
+    --color-abyss-bg-filter-selecs:#1A6A89;/*fondo de general de todas las opciones de filtro*/
+    --color-abyss-bg-title-option:#014660;
+    --color-abyss-title-option:#00BFB3;/*tipos , demografia , estado*/
+    --color-abyss-text-name-option:#00BFB3;/*manga , manhua , seinen , shounen , en emision*//*sin bg de name*/
+    --color-abyss-checkbox:#00BFB3;
+    --color-abyss-checkbox-border:#014660;
+  /*Vista obras*/
+      --color-abyss-bg-obras:#005859;
+      --color-abyss-bg-card-obra:#439892;/*75%*/
+      --color-abyss-text-name-obra:#014660;
+      --color-abyss-text-description-obra:#003E51;/*descripcion*/
+      --color-abyss-title-generos-obra:#014660;
+      --color-abyss-text-generos-obra:#04C1B5;
+      --color-abyss-bg-generos-obra:#025B6F;
+      --color-abyss-text-grupo-obra:#00514B; /* Verde oscuro */
+      --color-abyss-bg-grupo-obra:rgba(1, 72, 94, 0.4); /* Azul muy levemente oscuro con opacidad para combinar */
+      /* buton eliminar */
+      --color-abyss-bg-button-eliminar:#004E6B;
+      --color-abyss-text-button-eliminar:#00A89D;
+      --color-abyss-border-button-eliminar:#003A3B;
+      /* boton editar*/
+      --color-abyss-bg-button-editar:#00A89D;
+      --color-abyss-text-button-editar:#003E51;
+      --color-abyss-border-button-editar:#003A3B;
+      /* boton guardar obra*/
+      --color-abyss-bg-gradiente-1-button-guardar:#5BC8D2;
+      --color-abyss-bg-gradiente-2-button-guardar:#00514B;
+      --color-abyss-text-button-guardar-obra:#014660;
+      /*card capitulos*/
+      --color-abyss-bg-card-capitulos:#439892;/*100%*/
+      --color-abyss-bg-boton-capituloX:#025266;
+      --color-abyss-text-boton-capituloX:#00EEDE;
+      --color-abyss-border-boton-capituloX:#003E51;
+/*vista capitulos*/
+    --color-abyss-bg-fondo-capitulos:#005859;
+    --color-abyss-text-capitulos:#53B0AA;/*textos de nombres de capitulos y titulo de la obra*/
+    --color-abyss-bg-boton-off-capitulos:#017472;
+    --color-abyss-text-boton-off-capitulos:#063C51;
+    --color-abyss-border-boton-off-capitulos:#016B69;
+    --color-abyss-bg-boton-on-centro-capitulos:#019AC0;
+    --color-abyss-bg-boton-on-bordes-capitulos:#01485E;
+    /*el boton en on debe tener un gradiente entre el color centro y bordes*/
+    --color-abyss-text-boton-on-capitulos:#00514B;
+/*vista perfil*/
+    --color-abyss-bg-perfil:#005859;
+    /*fondo decorado + png*/
+    --color-abyss-bg-png-perfil:#017C98;
+    /* boton editar perfil */
+    --color-abyss-bg-button-edit-perfil:#1A6A89;
+    --color-abyss-text-button-edit-perfil:#26B3C0;
+    --color-abyss-border-button-edit-perfil:#01485E;
+    /*botones secciones */
+      /* boton off */
+      --color-abyss-text-button-off-seccion-perfil:#53B0AA;
+      --color-abyss-linea-button-off-seccion-perfil:#01485E;
+      /* boton on */
+      --color-abyss-text-button-on-seccion-perfil:#25F7E9;
+      --color-abyss-bg-gradiente-1-button-on-seccion-perfil:#00A298;
+      --color-abyss-bg-gradiente-2-button-on-seccion-perfil:#015056;/*gradiente lineal de arriba abajo color 1 arriba color 2 abajo*/
+    /*seccion historial*/
+      /*card historial*/
+      --color-abyss-bg-card-historial:#006678;
+      --color-abyss-text-card-historial:#00EBDB;
+    /*seccion guardados*/
+      /* boton estados off */
+      --color-abyss-bg-button-estados-off:#017472;
+      --color-abyss-text-button-estados-off:#3DB4BF;
+      --color-abyss-border-button-estados-off:#004A4A;
+      /* boton estados on */
+      --color-abyss-bg-gradiente-1-button-estados-on:#019AC0;
+      --color-abyss-bg-gradiente-2-button-estados-on:#01485E;/*gradiente centrar color 1 centro color 2 bordes*/
+      --color-abyss-text-button-estados-on:#02B5E2;
+      /*sin borde*/
+      --color-abyss-border-button-estados-on:none;
+    /*Componente navbar*/
+    --color-abyss-navbar-bg: #0A5571;  /* Fondo de la barra */
+    --color-abyss-navbar-text: #00E6D7; /* Color principal de texto y links */
+    --color-abyss-navbar-bg-searchbar:#1A6A89;
+    --color-abyss-navbar-text-searchbar:#25F7E9;
+    --color-abyss-navbar-icon-perfil:#009F97;
+    /*vista principal*/
+      --color-abyss-bg-principal:#005859;
+      --color-abyss-text-titles-principal:#53B0AA;
+      /*carrusel*/
+      --color-abyss-bg-carrusel:#025266;
+      --color-abyss-text-carrusel:#00BFB3;
+      /*filtro genero*/
+      --color-abyss-bg-filter-genero:#00A89D;
+      --color-abyss-text-filter-genero:#013E56;
+      
+
+
+
+      
+
+      
+
+
+}

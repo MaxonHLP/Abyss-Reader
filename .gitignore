@@ -1,0 +1,29 @@
+# Entornos de desarrollo
+.idea/
+.vscode/
+*.iml
+*.swp
+.DS_Store
+
+# Dependencias y builds del Frontend (React/Vite)
+front/node_modules/
+front/dist/
+front/build/
+front/.env
+front/.env.*.local
+front/npm-debug.log*
+front/yarn-error.log*
+
+# Compilados y builds del Backend (Spring Boot/Java)
+back/target/
+back/*.jar
+back/*.war
+back/.mvn/
+back/mvnw
+back/mvnw.cmd
+
+# (Opcional) Ignorar archivos de propiedades si contienen contraseñas reales de BD que no quieras subir:
+# back/src/main/resources/application-secret.properties
+
+# GCP Credentials
+back/*Credentials.json

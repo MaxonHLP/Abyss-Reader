@@ -1,0 +1,30 @@
+# Abyss Reader - Especificaciones del Backend
+
+## 1. Tecnologías Base
+- **Lenguaje:** Java 21 (LTS)
+- **Framework Principal:** Spring Boot 3.2+
+- **Gestor de Dependencias:** Maven (pom.xml)
+- **Base de Datos:** MySQL
+- **Estrategia de Herencia JPA:** JOINED (Tabla base 'usuarios', tablas hijas específicas)
+
+## 2. Dependencias Requeridas (pom.xml)
+1. `spring-boot-starter-web`: Para la creación de la API RESTful.
+2. `spring-boot-starter-data-jpa`: Para la persistencia de datos mediante Hibernate.
+3. `mysql-connector-j`: Driver de conexión para la base de datos MySQL.
+4. `spring-boot-starter-security`: Motor de seguridad base.
+5. `spring-boot-starter-validation`: Validaciones de datos en DTOs y Entidades (@Email, @NotBlank).
+6. `lombok`: Reducción de código repetitivo (Getters, Setters, Constructores).
+7. `spring-cloud-gcp-starter-storage`: Integración nativa con Google Cloud Storage Buckets.
+8. `jjwt-api`, `jjwt-impl`, `jjwt-jackson`: Librerías para la generación y lectura de tokens JWT.
+
+## 3. Arquitectura de Paquetes (Estructura de Carpetas)
+Ruta base: src/main/java/com/abyssreader/api/
+- `/config`: Configuraciones de Beans, CORS y Google Cloud.
+- `/controller`: Endpoints HTTP de la API.
+- `/service`: Lógica de negocio e implementación de reglas de acceso.
+- `/repository`: Interfaces de acceso a datos (JpaRepository).
+- `/entity`: Modelos de la base de datos vinculados a MySQL.
+- `/dto`: Objetos de transferencia de datos de entrada y salida (incluyen booleanos de permisos).
+- `/security`: Filtros JWT y configuración del AuthenticationManager.
+- `/exception`: Manejo global y centralizado de errores de la API.
+- `/util`: Clases utilitarias (Generador JWT, formateador de imágenes).
