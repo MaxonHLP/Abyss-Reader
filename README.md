@@ -1,6 +1,6 @@
 # Abyss Reader
 
-Abyss Reader es una plataforma web para la lectura y gestión de mangas, cómics y novelas. Este repositorio funciona como un **Monorepo**, conteniendo tanto el código del frontend como del backend en sus respectivas carpetas.
+Abyss Reader es una plataforma web para la lectura y gestión de mangas , manhwas y manhuas. Este repositorio funciona como un **Monorepo**, conteniendo tanto el código del frontend como del backend en sus respectivas carpetas.
 
 ## Tecnologías Utilizadas
 
