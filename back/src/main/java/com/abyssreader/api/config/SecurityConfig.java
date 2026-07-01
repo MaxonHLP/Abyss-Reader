@@ -50,8 +50,10 @@ public class SecurityConfig {
 
                 // Configuramos los permisos de las rutas
                 .authorizeHttpRequests(authz -> authz
-                        // Permitir GET públicos a catálogos y lectura de capítulos
+                        // Permitir GET públicos a catálogos, lectura de capítulos y comentarios
                         .requestMatchers(HttpMethod.GET, "/api/tipos/**", "/api/demografias/**", "/api/generos/**", "/api/grupos/**", "/api/obras/**", "/api/obra/**", "/api/miembros/**", "/api/catalogo/**").permitAll()
+                        // Comentarios: DELETE protegido (autor/MASTER), el GET ya está cubierto arriba
+                        .requestMatchers(HttpMethod.DELETE, "/api/comentarios/**").authenticated()
                         // Permitir todas las peticiones a los endpoints de autenticación
                         .requestMatchers("/api/auth/**").permitAll()
                         // Perfil del usuario autenticado

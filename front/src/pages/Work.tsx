@@ -7,6 +7,7 @@ import EditChapterModal from '../components/modales/EditChapterModal';
 import EditWorkModal from '../components/modales/EditWorkModal';
 import DeleteChapterModal from '../components/modales/DeleteChapterModal';
 import Navbar from '../components/Navbar';
+import CommentSection from '../components/comments/CommentSection';
 
 type EstadoGuardado = 'SIGUIENDO' | 'LEYENDO' | 'LEIDO';
 
@@ -548,6 +549,12 @@ export default function Work() {
           </div>
         )}
       </div>
+
+      {/* Sección de Comentarios */}
+      <div className="w-full max-w-4xl">
+        <CommentSection obraId={obra.id} />
+      </div>
+
       </div>
     </div>
   );

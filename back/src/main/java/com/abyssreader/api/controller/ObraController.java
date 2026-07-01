@@ -81,7 +81,11 @@ public class ObraController {
      */
     @GetMapping("/api/obras/{id}/like")
     public ResponseEntity<Map<String, Object>> getLikeStatus(@PathVariable Long id) {
-        String mail = SecurityContextHolder.getContext().getAuthentication().getName();
+        var auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !auth.isAuthenticated() || "anonymousUser".equals(auth.getName())) {
+            return ResponseEntity.ok(Map.of("liked", false));
+        }
+        String mail = auth.getName();
         boolean liked = obraInteraccionService.tienelike(id, mail);
         return ResponseEntity.ok(Map.of("liked", liked));
     }

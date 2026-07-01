@@ -45,7 +45,7 @@ function formatFecha(isoString: string): string {
 
 // ── Componente principal ───────────────────────────────────────
 export default function UserProfile() {
-  const { user, logout } = useAuthStore();
+  const { user, login, logout, token } = useAuthStore();
   const navigate = useNavigate();
 
   const [tabActiva, setTabActiva] = useState<TabActiva>('historial');
@@ -59,11 +59,23 @@ export default function UserProfile() {
     navigate('/login');
   };
 
-  // Cargar descripción real del usuario
+  // Cargar perfil completo del usuario
   useEffect(() => {
-    api.get<{ descripcion: string | null }>('/usuarios/me')
-      .then(res => setDescripcionPerfil(res.data.descripcion))
+    api.get<{ nombre: string; mail: string; descripcion: string | null; fotoPerfil: string | null; rol: string }>('/usuarios/me')
+      .then(res => {
+        setDescripcionPerfil(res.data.descripcion);
+        if (user && token) {
+          login(token, {
+            ...user,
+            nombre: res.data.nombre,
+            mail: res.data.mail,
+            fotoPerfil: res.data.fotoPerfil,
+            rol: res.data.rol
+          });
+        }
+      })
       .catch(() => {});
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Historial

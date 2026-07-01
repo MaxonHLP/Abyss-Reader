@@ -97,6 +97,23 @@
       --color-abyss-bg-boton-capituloX:#025266;
       --color-abyss-text-boton-capituloX:#00EEDE;
       --color-abyss-border-boton-capituloX:#003E51;
+    /*Seccion comentarios*/
+      --color-abyss-bg-seccion-comentarios:#006866;
+      --color-abyss-title-seccion-comentarios:#5BC8D2;
+      --color-abyss-border-seccion-comentarios:#005859;
+      /*card escribir comentario*/
+        --color-abyss-bg-card-escribir-comentario:#008C86;
+        --color-abyss-text-card-escribir-comentario:#003C53;
+      /* boton publicar*/
+        --color-abyss-bg-button-publicar:#017876;
+        --color-abyss-text-button-publicar:#00EBDB;
+      /*card comentarios*/
+        --color-abyss-bg-card-comentario:#1A6A89;
+        --color-abyss-text-card-comentario:#0AE9DA;
+      /*nombre usuario*/
+        --color-abyss-text-name-comentario:#25F7E9;
+      /*fecha comentario*/
+        --color-abyss-text-fecha-comentario:#BCBCBC;
 /*vista capitulos*/
     --color-abyss-bg-fondo-capitulos:#005859;
     --color-abyss-text-capitulos:#53B0AA;/*textos de nombres de capitulos y titulo de la obra*/

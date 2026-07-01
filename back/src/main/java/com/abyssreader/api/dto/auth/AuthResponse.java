@@ -13,4 +13,5 @@ public class AuthResponse {
     private String nombre;
     private Rol rol;
     private Long grupoId;
+    private String fotoPerfil;
 }
