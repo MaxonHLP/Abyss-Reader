@@ -54,7 +54,7 @@ export default function Groups() {
                 {grupo.portada ? (
                   <div 
                     className="absolute inset-0 w-full h-full bg-cover bg-center transition-transform duration-500 group-hover:scale-105" 
-                    style={{ backgroundImage: `url(${grupo.portada})` }}
+                    style={{ backgroundImage: `url('${grupo.portada}')` }}
                   />
                 ) : (
                   <div className="absolute inset-0 w-full h-full bg-abyss-bg-card-gp flex items-center justify-center transition-transform duration-500 group-hover:scale-105">

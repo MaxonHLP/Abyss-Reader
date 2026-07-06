@@ -50,8 +50,7 @@ public class CapituloController {
             @PathVariable String nombreObra,
             @PathVariable double numero
     ) {
-        String titulo = nombreObra.replace("-", " ");
-        return ResponseEntity.ok(capituloService.obtenerCapituloPorObraYNumero(titulo, numero));
+        return ResponseEntity.ok(capituloService.obtenerCapituloPorObraYNumero(nombreObra, numero));
     }
     /**
      * GET /api/obras/{obraId}/capitulos

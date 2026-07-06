@@ -41,6 +41,10 @@ public class CapituloService {
      */
     @Transactional
     public CapituloResponseDTO crearCapitulo(Long obraId, double numero, List<MultipartFile> paginas) {
+        if (capituloRepository.existsByObraIdAndNumero(obraId, numero)) {
+            throw new IllegalArgumentException("Ya existe el capítulo " + numero + " para esta obra.");
+        }
+
         // Proxy de Obra: no hace SELECT hasta que se accede a un campo; el INSERT validará la FK
         Obra obra = obraRepository.getReferenceById(obraId);
 

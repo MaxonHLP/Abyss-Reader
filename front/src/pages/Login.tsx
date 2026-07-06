@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import api from '../services/api';
 import { useAuthStore } from '../store/useAuthStore';
 import bgLog from '../assets/bg-log.png';
+import Navbar from '../components/Navbar';
 
 interface LoginCredentials {
   email: string;
@@ -18,6 +19,10 @@ const Login = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const navigate = useNavigate();
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const sessionExpired = searchParams.get('session_expired') === 'true';
+
   const { login } = useAuthStore();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -74,14 +79,45 @@ const Login = () => {
     }
   };
 
+  const handleDemoLogin = async (email: string) => {
+    setError(null);
+    setIsLoading(true);
+    setCredentials({ email, password: '123456' });
+    try {
+      const response = await api.post('/auth/login', { mail: email, contrasena: '123456' });
+      const { token, ...userData } = response.data;
+      login(token, userData);
+      if (userData.rol === 'LECTOR') {
+        navigate('/');
+      } else if (userData.rol === 'MASTER') {
+        navigate('/master');
+      } else if (userData.rol === 'MIEMBRO_ADMIN' || userData.rol === 'MIEMBRO') {
+        if (userData.grupoId) {
+          navigate(`/grupos/${userData.grupoId}`);
+        } else {
+          navigate('/master');
+        }
+      } else {
+        navigate('/');
+      }
+    } catch (err) {
+      console.error("Error en login demo:", err);
+      setError("Error al iniciar sesión con cuenta demo.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
-    <div className="min-h-screen w-full relative flex items-center justify-center bg-abyss-bg-png overflow-hidden p-4">
-      {/* Imagen de fondo semitransparente superpuesta al color */}
-      <img 
-        src={bgLog} 
-        alt="Fondo del Abismo" 
-        className="absolute inset-0 w-full h-full object-cover opacity-70 pointer-events-none" 
-      />
+    <div className="min-h-screen w-full relative flex flex-col bg-abyss-bg-png overflow-hidden">
+      <Navbar />
+      <div className="flex-1 w-full relative flex items-center justify-center p-4">
+        {/* Imagen de fondo semitransparente superpuesta al color */}
+        <img 
+          src={bgLog} 
+          alt="Fondo del Abismo" 
+          className="absolute inset-0 w-full h-full object-cover opacity-70 pointer-events-none" 
+        />
       
       {/* Contenedor del formulario */}
       <form 
@@ -96,6 +132,12 @@ const Login = () => {
             Inicia sesión
           </p>
         </div>
+
+        {sessionExpired && (
+          <div className="bg-red-900/40 border border-red-500 text-white px-4 py-3 rounded-lg text-center font-bold text-sm">
+            Tu sesión ha expirado. Por favor, inicia sesión nuevamente para continuar.
+          </div>
+        )}
 
         <div className="flex flex-col gap-4">
           <input
@@ -138,7 +180,36 @@ const Login = () => {
             ¿El abismo te rechaza? Regístrate
           </Link>
         </div>
+
+        {/* Botones de demostración */}
+        <div className="flex flex-col gap-2 mt-4 pt-4 border-t border-abyss-text-log/30">
+          <button 
+            type="button"
+            disabled={isLoading}
+            onClick={() => handleDemoLogin('Lector@demo.com')}
+            className="text-xs bg-gray-800 hover:bg-gray-700 text-white font-semibold py-2 rounded-lg transition disabled:opacity-50"
+          >
+            Acceder como lector demo
+          </button>
+          <button 
+            type="button"
+            disabled={isLoading}
+            onClick={() => handleDemoLogin('MiembroAd@demo.com')}
+            className="text-xs bg-gray-800 hover:bg-gray-700 text-white font-semibold py-2 rounded-lg transition disabled:opacity-50"
+          >
+            Acceder como Miembro Admin demo
+          </button>
+          <button 
+            type="button"
+            disabled={isLoading}
+            onClick={() => handleDemoLogin('Master@demo.com')}
+            className="text-xs bg-gray-800 hover:bg-gray-700 text-white font-semibold py-2 rounded-lg transition disabled:opacity-50"
+          >
+            Acceder como master demo
+          </button>
+        </div>
       </form>
+      </div>
     </div>
   );
 };

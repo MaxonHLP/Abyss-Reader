@@ -31,7 +31,7 @@ public class Grupo extends BaseEntity {
     private String nombre;
 
     @Column(name = "portada")
-    private String portada; // URL of the image
+    private String portada;
 
     @Column(name = "descripcion", length = 500)
     private String descripcion;

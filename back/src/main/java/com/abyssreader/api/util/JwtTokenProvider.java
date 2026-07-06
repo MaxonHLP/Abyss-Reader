@@ -18,7 +18,7 @@ public class JwtTokenProvider {
     private String jwtSecret;
 
     @Value("${jwt.expiration}")
-    private int jwtExpirationInMs;
+    private long jwtExpirationInMs;
 
     public String generarToken(String mail, Long id, Rol rol) {
         Date ahora = new Date();

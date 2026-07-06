@@ -28,6 +28,7 @@ interface CreateChapterModalProps {
   isOpen: boolean;
   obraId: number;
   obraNombre: string;
+  capitulosExistentes: number[];
   onClose: () => void;
   onSuccess: () => void;
 }
@@ -96,6 +97,7 @@ const CreateChapterModal = ({
   isOpen,
   obraId,
   obraNombre,
+  capitulosExistentes,
   onClose,
   onSuccess,
 }: CreateChapterModalProps) => {
@@ -194,6 +196,10 @@ const CreateChapterModal = ({
     const numeroFloat = parseFloat(numero);
     if (!numero.trim() || isNaN(numeroFloat) || numeroFloat <= 0) {
       setError('Ingresá un número de capítulo válido y mayor a 0.');
+      return;
+    }
+    if (capitulosExistentes.includes(numeroFloat)) {
+      setError(`El capítulo ${numeroFloat} ya existe en esta obra.`);
       return;
     }
     if (items.length === 0) {

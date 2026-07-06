@@ -10,6 +10,7 @@ import lombok.Setter;
 @AllArgsConstructor
 public class AuthResponse {
     private String token;
+    private String mail;
     private String nombre;
     private Rol rol;
     private Long grupoId;

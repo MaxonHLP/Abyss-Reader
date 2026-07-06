@@ -22,5 +22,4 @@ public class Miembro extends Usuario {
     @JoinColumn(name = "grupo_id")
     private Grupo grupo;
 
-    // TODO: Agregar relación de Obras (@OneToMany) más adelante
 }

@@ -35,6 +35,9 @@ public class Usuario extends BaseEntity {
     @Column(name = "foto_perfil")
     private String fotoPerfil;
 
+    @Column(name = "descripcion", columnDefinition = "TEXT")
+    private String descripcion;
+
     @Column(nullable = false)
     private Boolean activo = true;
 }

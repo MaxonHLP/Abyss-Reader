@@ -16,17 +16,17 @@ public interface ObraRepository extends JpaRepository<Obra, Long>, JpaSpecificat
     boolean existsByTitulo(String titulo);
 
     /** Incremento atómico de vistas — seguro ante condiciones de carrera */
-    @Modifying
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("UPDATE Obra o SET o.vistas = o.vistas + 1 WHERE o.id = :id")
     void incrementarVistas(@Param("id") Long id);
 
     /** Incremento atómico de likes */
-    @Modifying
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("UPDATE Obra o SET o.likes = o.likes + 1 WHERE o.id = :id")
     void incrementarLikes(@Param("id") Long id);
 
     /** Decremento atómico de likes (con floor a 0 para evitar negativos) */
-    @Modifying
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("UPDATE Obra o SET o.likes = GREATEST(o.likes - 1, 0) WHERE o.id = :id")
     void decrementarLikes(@Param("id") Long id);
 

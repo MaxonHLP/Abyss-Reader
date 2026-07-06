@@ -31,9 +31,6 @@ interface GuardadoItem {
 }
 
 // ── Helpers ───────────────────────────────────────────────────
-function obraSlug(titulo: string): string {
-  return titulo.replace(/ /g, '-');
-}
 
 function formatFecha(isoString: string): string {
   return new Date(isoString).toLocaleDateString('es-AR', {
@@ -245,7 +242,7 @@ export default function UserProfile() {
                 {historial.map(item => (
                   <Link
                     key={item.id}
-                    to={`/obra/${obraSlug(item.obraTitulo)}`}
+                    to={`/obra/${item.obraTitulo}`}
                     className="rounded-xl overflow-hidden border border-transparent hover:scale-[1.02] transition-transform duration-200 shadow-md"
                     style={{ background: 'var(--color-abyss-bg-card-historial)' }}
                   >
@@ -327,7 +324,7 @@ export default function UserProfile() {
                 {guardadosFiltrados.map(item => (
                   <Link
                     key={item.id}
-                    to={`/obra/${obraSlug(item.obraTitulo)}`}
+                    to={`/obra/${item.obraTitulo}`}
                     className="rounded-xl overflow-hidden hover:scale-[1.03] transition-transform duration-200 shadow-md"
                     style={{ background: 'var(--color-abyss-bg-card-historial)' }}
                   >

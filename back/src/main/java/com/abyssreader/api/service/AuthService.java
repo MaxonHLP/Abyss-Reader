@@ -51,7 +51,7 @@ public class AuthService {
                 usuarioGuardado.getId(),
                 usuarioGuardado.getRol());
 
-        return new AuthResponse(token, usuarioGuardado.getNombre(), usuarioGuardado.getRol(), null, usuarioGuardado.getFotoPerfil());
+        return new AuthResponse(token, usuarioGuardado.getMail(), usuarioGuardado.getNombre(), usuarioGuardado.getRol(), null, usuarioGuardado.getFotoPerfil());
     }
 
     @Transactional(readOnly = true)
@@ -81,6 +81,6 @@ public class AuthService {
             }
         }
 
-        return new AuthResponse(token, usuario.getNombre(), usuario.getRol(), grupoId, usuario.getFotoPerfil());
+        return new AuthResponse(token, usuario.getMail(), usuario.getNombre(), usuario.getRol(), grupoId, usuario.getFotoPerfil());
     }
 }

@@ -57,7 +57,7 @@ export default function Carousel({ obras }: CarouselProps) {
               {obra.portada && (
                 <div 
                   className="absolute inset-0 bg-cover bg-center opacity-30 blur-xl"
-                  style={{ backgroundImage: `url(${obra.portada})` }}
+                  style={{ backgroundImage: `url('${obra.portada}')` }}
                 />
               )}
               {obra.portada ? (

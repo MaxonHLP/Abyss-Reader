@@ -44,8 +44,7 @@ public class ObraController {
 
     @GetMapping("/api/obra/{nombre}")
     public ResponseEntity<ObraResponseDTO> getObraByNombre(@PathVariable String nombre) {
-        String tituloDecodificado = nombre.replace("-", " ");
-        return ResponseEntity.ok(obraService.getObraByTitulo(tituloDecodificado));
+        return ResponseEntity.ok(obraService.getObraByTitulo(nombre));
     }
 
     @PostMapping(value = "/api/obras", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)

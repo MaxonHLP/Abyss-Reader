@@ -19,4 +19,18 @@ api.interceptors.request.use(
   }
 );
 
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response && error.response.status === 401) {
+      const { user, logout } = useAuthStore.getState();
+      if (user && ['MIEMBRO', 'MIEMBRO_ADMIN', 'MASTER'].includes(user.rol)) {
+        logout();
+        window.location.href = '/login?session_expired=true';
+      }
+    }
+    return Promise.reject(error);
+  }
+);
+
 export default api;

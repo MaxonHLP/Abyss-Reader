@@ -12,6 +12,9 @@ public interface CapituloRepository extends JpaRepository<Capitulo, Long> {
     /** Busca un capítulo por el título de su obra y el número. */
     Optional<Capitulo> findByObraTituloAndNumero(String titulo, double numero);
 
+    /** Verifica si ya existe un capítulo con ese número en la obra. */
+    boolean existsByObraIdAndNumero(Long obraId, double numero);
+
     /** Lista todos los capítulos de una obra, ordenados de menor a mayor número. */
     java.util.List<Capitulo> findByObraIdOrderByNumeroAsc(Long obraId);
 

@@ -31,6 +31,13 @@ public class CloudStorageServiceImpl implements StorageService {
     @Override
     public String uploadFile(MultipartFile file, String folderPath) {
         try {
+            org.springframework.security.core.Authentication auth = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+            if (auth != null && auth.isAuthenticated() && !auth.getPrincipal().equals("anonymousUser")) {
+                if (auth.getName().endsWith("@demo.com")) {
+                    folderPath = "demo-uploads/" + folderPath;
+                }
+            }
+
             String originalFilename = file.getOriginalFilename() != null
                     ? file.getOriginalFilename()
                     : "pagina";

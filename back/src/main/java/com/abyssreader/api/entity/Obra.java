@@ -29,10 +29,10 @@ public class Obra extends BaseEntity {
     @Column
     private String portada;
 
-    @Column(nullable = false, columnDefinition = "int default 0")
+    @Column(nullable = false)
     private Integer vistas = 0;
 
-    @Column(nullable = false, columnDefinition = "int default 0")
+    @Column(nullable = false)
     private Integer likes = 0;
 
     @Enumerated(EnumType.STRING)

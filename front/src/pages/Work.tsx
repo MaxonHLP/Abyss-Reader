@@ -228,6 +228,7 @@ export default function Work() {
         isOpen={modalAbierto}
         obraId={obra.id}
         obraNombre={obra.titulo}
+        capitulosExistentes={capitulos.map(c => c.numero)}
         onClose={() => setModalAbierto(false)}
         onSuccess={handleChapterCreated}
       />

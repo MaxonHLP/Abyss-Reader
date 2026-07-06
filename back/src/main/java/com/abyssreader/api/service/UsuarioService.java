@@ -2,7 +2,6 @@ package com.abyssreader.api.service;
 
 import com.abyssreader.api.dto.usuario.UpdateProfileRequestDTO;
 import com.abyssreader.api.dto.usuario.UserProfileResponseDTO;
-import com.abyssreader.api.entity.Lector;
 import com.abyssreader.api.entity.Usuario;
 import com.abyssreader.api.repository.UsuarioRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -32,16 +31,11 @@ public class UsuarioService {
         Usuario usuario = usuarioRepository.findByMail(mail)
                 .orElseThrow(() -> new EntityNotFoundException("Usuario no encontrado"));
 
-        String descripcion = null;
-        if (usuario instanceof Lector lector) {
-            descripcion = lector.getDescripcion();
-        }
-
         return new UserProfileResponseDTO(
                 usuario.getId(),
                 usuario.getNombre(),
                 usuario.getMail(),
-                descripcion,
+                usuario.getDescripcion(),
                 usuario.getFotoPerfil(),
                 usuario.getRol().name()
         );
@@ -87,9 +81,9 @@ public class UsuarioService {
             usuario.setContrasena(passwordEncoder.encode(request.getContrasena()));
         }
 
-        // Actualizar descripción (solo si el usuario es Lector)
-        if (request.getDescripcion() != null && usuario instanceof Lector lector) {
-            lector.setDescripcion(request.getDescripcion());
+        // Actualizar descripción
+        if (request.getDescripcion() != null) {
+            usuario.setDescripcion(request.getDescripcion());
         }
 
         // Actualizar foto de perfil si se proporcionó una nueva
@@ -108,16 +102,11 @@ public class UsuarioService {
 
         usuarioRepository.save(usuario);
 
-        String descripcion = null;
-        if (usuario instanceof Lector lector) {
-            descripcion = lector.getDescripcion();
-        }
-
         return new UserProfileResponseDTO(
                 usuario.getId(),
                 usuario.getNombre(),
                 usuario.getMail(),
-                descripcion,
+                usuario.getDescripcion(),
                 usuario.getFotoPerfil(),
                 usuario.getRol().name()
         );

@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import api from '../services/api';
 import bgLog from '../assets/bg-log.png';
+import Navbar from '../components/Navbar';
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -67,13 +68,15 @@ const Register = () => {
   };
 
   return (
-    <div className="min-h-screen w-full relative flex items-center justify-center bg-abyss-bg-png overflow-hidden p-4">
-      {/* Imagen de fondo semitransparente superpuesta al color */}
-      <img 
-        src={bgLog} 
-        alt="Fondo del Abismo" 
-        className="absolute inset-0 w-full h-full object-cover opacity-70 pointer-events-none" 
-      />
+    <div className="min-h-screen w-full relative flex flex-col bg-abyss-bg-png overflow-hidden">
+      <Navbar />
+      <div className="flex-1 w-full relative flex items-center justify-center p-4">
+        {/* Imagen de fondo semitransparente superpuesta al color */}
+        <img 
+          src={bgLog} 
+          alt="Fondo del Abismo" 
+          className="absolute inset-0 w-full h-full object-cover opacity-70 pointer-events-none" 
+        />
       
       {/* Contenedor del formulario */}
       <form 
@@ -147,6 +150,7 @@ const Register = () => {
           </Link>
         </div>
       </form>
+      </div>
     </div>
   );
 };

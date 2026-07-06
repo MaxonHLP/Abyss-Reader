@@ -8,6 +8,7 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
+
 @Component
 @RequiredArgsConstructor
 public class DataInitializer implements CommandLineRunner {
@@ -17,20 +18,20 @@ public class DataInitializer implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        String masterEmail = "lord@abyss.com";
-        if (!usuarioRepository.existsByMail(masterEmail)) {
-            Usuario master = new Usuario();
-            master.setNombre("Lord of Abyss");
-            master.setMail(masterEmail);
-            master.setContrasena(passwordEncoder.encode("123456"));
-            master.setRol(Rol.MASTER);
-            try {
-                usuarioRepository.save(master);
-                System.out.println("Usuario MASTER creado: " + masterEmail + " / 123456");
-            } catch (org.springframework.dao.DataIntegrityViolationException e) {
-                System.out.println(
-                        "El usuario MASTER ya existe en la BD (posiblemente inactivo). Saltando inicialización.");
-            }
+        crearUsuarioSiNoExiste("Lector@demo.com", "Un NPC mas del abismo", "123456", Rol.LECTOR);
+        crearUsuarioSiNoExiste("MiembroAd@demo.com", "Un Esbirro Lider", "123456", Rol.MIEMBRO_ADMIN);
+        crearUsuarioSiNoExiste("Master@demo.com", "Lord Of Abyss", "123456", Rol.MASTER);
+    }
+
+    private void crearUsuarioSiNoExiste(String mail, String nombre, String contrasena, Rol rol) {
+        if (!usuarioRepository.existsByMail(mail)) {
+            Usuario usuario = new Usuario();
+            usuario.setMail(mail);
+            usuario.setNombre(nombre);
+            usuario.setContrasena(passwordEncoder.encode(contrasena));
+            usuario.setRol(rol);
+            usuario.setActivo(true);
+            usuarioRepository.save(usuario);
         }
     }
 }

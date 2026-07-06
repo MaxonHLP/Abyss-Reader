@@ -108,6 +108,11 @@ export default function Navbar() {
         )}
       </div>
     </nav>
+    {isAuthenticated && user?.mail?.endsWith('@demo.com') && (
+      <div className="w-full bg-[var(--color-abyss-navbar-bg)] text-[var(--color-abyss-navbar-text)] text-center font-bold py-2 shadow-md">
+        Estas usando un Usuario de demostracion
+      </div>
+    )}
     </>
   );
 }
