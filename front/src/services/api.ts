@@ -1,15 +1,8 @@
 import axios from 'axios';
 import { useAuthStore } from '../store/useAuthStore';
 
-const getBaseUrl = () => {
-  const envUrl = import.meta.env.VITE_API_URL;
-  if (!envUrl) return 'http://localhost:8080/api';
-  // Asegura que siempre tenga el sufijo /api, sin importar cómo se haya configurado en Vercel
-  return envUrl.endsWith('/api') ? envUrl : `${envUrl}/api`;
-};
-
 const api = axios.create({
-  baseURL: getBaseUrl(),
+  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8080/api',
 });
 
 // Interceptor para inyectar automáticamente el token JWT en las peticiones
