@@ -43,9 +43,12 @@ public class HistorialService {
         Usuario usuario = usuarioRepository.findByMail(mail)
                 .orElseThrow(() -> new EntityNotFoundException("Usuario no encontrado: " + mail));
 
-        // getReferenceById para Obra y Capitulo: evita SELECTs previos innecesarios
-        Obra obra = obraRepository.getReferenceById(dto.getObraId());
-        Capitulo capitulo = capituloRepository.getReferenceById(dto.getCapituloId());
+        // Obtenemos las entidades reales en lugar de proxies (getReferenceById) 
+        // porque luego en mapToDTO necesitamos leer propiedades como titulo y portada.
+        Obra obra = obraRepository.findById(dto.getObraId())
+                .orElseThrow(() -> new EntityNotFoundException("Obra no encontrada"));
+        Capitulo capitulo = capituloRepository.findById(dto.getCapituloId())
+                .orElseThrow(() -> new EntityNotFoundException("Capítulo no encontrado"));
 
         Historial historial = historialRepository
                 .findByUsuarioMailAndObraId(mail, dto.getObraId())
