@@ -164,7 +164,7 @@ export default function Catalog() {
             </button>
             
             <div className={`transition-all duration-300 ease-in-out overflow-hidden ${filtrosOpen ? 'max-h-[1000px] opacity-100 border-t border-abyss-border-input' : 'max-h-0 opacity-0'}`}>
-              <div className="p-4 md:p-6 bg-abyss-bg-filter-selecs grid grid-cols-1 sm:grid-cols-3 gap-6 md:gap-8">
+              <div className="p-4 md:p-6 bg-abyss-bg-filter-selecs grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
                 
                 {/* Tipo */}
                 <div>
