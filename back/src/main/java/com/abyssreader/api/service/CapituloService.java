@@ -2,6 +2,9 @@ package com.abyssreader.api.service;
 
 import com.abyssreader.api.dto.capitulo.CapituloListItemDTO;
 import com.abyssreader.api.dto.capitulo.CapituloResponseDTO;
+import com.abyssreader.api.dto.capitulo.ConfirmarCapituloRequestDTO;
+import com.abyssreader.api.dto.capitulo.SignedUrlRequestItem;
+import com.abyssreader.api.dto.capitulo.SignedUrlsResponseDTO;
 import com.abyssreader.api.entity.Capitulo;
 import com.abyssreader.api.entity.Obra;
 import com.abyssreader.api.repository.CapituloRepository;
@@ -61,6 +64,46 @@ public class CapituloService {
         }
         capitulo.setPaginasUrls(urls);
 
+        Capitulo guardado = capituloRepository.save(capitulo);
+        return mapToDTO(guardado);
+    }
+
+    /**
+     * Fase 1 del flujo de Signed URLs: genera URLs firmadas temporales (15 min) para que
+     * el frontend suba las imágenes directamente a GCS sin pasar por este servidor.
+     *
+     * @param obraId   ID de la obra a la que pertenece el capítulo
+     * @param numero   número del capítulo (para validación de duplicado y ruta en bucket)
+     * @param archivos lista de descriptores de archivo ({nombre, tipo}) enviados por el frontend
+     * @return DTO con lista de pares (uploadUrl firmada, publicUrl final)
+     */
+    public SignedUrlsResponseDTO generarUrlsFirmadas(Long obraId, double numero, List<SignedUrlRequestItem> archivos) {
+        if (capituloRepository.existsByObraIdAndNumero(obraId, numero)) {
+            throw new IllegalArgumentException("Ya existe el capítulo " + numero + " para esta obra.");
+        }
+        String folderPath = String.format("obras/%d/capitulos/%.0f/", obraId, numero);
+        return storageService.generarUrlsFirmadas(archivos, folderPath);
+    }
+
+    /**
+     * Fase 2 del flujo de Signed URLs: el frontend ya subió las imágenes a GCS y notifica
+     * al backend con las URLs públicas para persistir el capítulo en la base de datos.
+     *
+     * @param obraId  ID de la obra
+     * @param request DTO con número de capítulo y lista ordenada de URLs públicas de GCS
+     * @return DTO completo del capítulo recién creado
+     */
+    @Transactional
+    public CapituloResponseDTO confirmarCapitulo(Long obraId, ConfirmarCapituloRequestDTO request) {
+        double numero = request.getNumero();
+        if (capituloRepository.existsByObraIdAndNumero(obraId, numero)) {
+            throw new IllegalArgumentException("Ya existe el capítulo " + numero + " para esta obra.");
+        }
+        Obra obra = obraRepository.getReferenceById(obraId);
+        Capitulo capitulo = new Capitulo();
+        capitulo.setObra(obra);
+        capitulo.setNumero(numero);
+        capitulo.setPaginasUrls(request.getPaginasUrls());
         Capitulo guardado = capituloRepository.save(capitulo);
         return mapToDTO(guardado);
     }

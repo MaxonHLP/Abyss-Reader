@@ -209,23 +209,43 @@ const CreateChapterModal = ({
 
     setIsLoading(true);
     setError(null);
-    setProgreso(`Subiendo ${items.length} página${items.length > 1 ? 's' : ''}...`);
 
     try {
-      const formData = new FormData();
+      // ── Fase 1: Pedir URLs firmadas al backend ────────────────────────────
+      setProgreso('Generando acceso seguro...');
+      const archivosPayload = items.map((item) => ({
+        nombre: item.archivoFisico.name,
+        tipo: item.archivoFisico.type,
+      }));
 
-      const metadataBlob = new Blob(
-        [JSON.stringify({ numero: numeroFloat })],
-        { type: 'application/json' }
+      const { data: signedData } = await api.post<{
+        items: { uploadUrl: string; publicUrl: string }[];
+      }>(`/obras/${obraId}/capitulos/signed-urls?numero=${numeroFloat}`, archivosPayload);
+
+      // ── Fase 2: Subida paralela directa a GCS ────────────────────────────
+      setProgreso(`Subiendo ${items.length} página${items.length > 1 ? 's' : ''} directamente a la nube...`);
+
+      const uploadResults = await Promise.all(
+        signedData.items.map((signedItem, idx) =>
+          fetch(signedItem.uploadUrl, {
+            method: 'PUT',
+            // ⚠ El Content-Type DEBE coincidir exactamente con el firmado en la Fase 1
+            headers: { 'Content-Type': items[idx].archivoFisico.type },
+            body: items[idx].archivoFisico,
+          }).then((res) => {
+            if (!res.ok) {
+              throw new Error(`Error al subir página ${idx + 1}: ${res.status} ${res.statusText}`);
+            }
+            return signedItem.publicUrl;
+          })
+        )
       );
-      formData.append('metadata', metadataBlob);
 
-      items.forEach((item) => {
-        formData.append('paginas', item.archivoFisico);
-      });
-
-      await api.post(`/obras/${obraId}/capitulos`, formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
+      // ── Fase 3: Confirmar al backend para persistir el capítulo ──────────
+      setProgreso('Guardando capítulo...');
+      await api.post(`/obras/${obraId}/capitulos/confirmar`, {
+        numero: numeroFloat,
+        paginasUrls: uploadResults,
       });
 
       setProgreso(null);
@@ -238,8 +258,9 @@ const CreateChapterModal = ({
       const msg =
         (typeof raw === 'object' && raw !== null && 'message' in raw ? raw.message : undefined) ||
         (typeof raw === 'string' ? raw : undefined) ||
+        (err instanceof Error ? err.message : undefined) ||
         'Ocurrió un error al subir el capítulo.';
-      setError(msg);
+      setError(msg ?? 'Ocurrió un error al subir el capítulo.');
       setProgreso(null);
     } finally {
       setIsLoading(false);

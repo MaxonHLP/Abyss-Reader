@@ -1,17 +1,17 @@
 package com.abyssreader.api.controller;
 
 import com.abyssreader.api.dto.capitulo.CapituloListItemDTO;
-import com.abyssreader.api.dto.capitulo.CapituloRequestDTO;
 import com.abyssreader.api.dto.capitulo.CapituloResponseDTO;
+import com.abyssreader.api.dto.capitulo.ConfirmarCapituloRequestDTO;
+import com.abyssreader.api.dto.capitulo.SignedUrlRequestItem;
+import com.abyssreader.api.dto.capitulo.SignedUrlsResponseDTO;
 import com.abyssreader.api.service.CapituloService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -22,21 +22,38 @@ public class CapituloController {
     private final CapituloService capituloService;
 
     /**
-     * POST /api/obras/{obraId}/capitulos
-     * Crea un nuevo capítulo para una obra, recibiendo metadata y páginas por multipart.
+     * POST /api/obras/{obraId}/capitulos/signed-urls?numero={numero}
+     * Fase 1 del flujo de subida directa a GCS.
+     * El frontend envía un JSON ligero con los nombres y tipos de las imágenes.
+     * El backend devuelve URLs firmadas temporales (15 min) para que el frontend
+     * suba los archivos binarios directamente a Google Cloud Storage via PUT.
      * Requiere rol MASTER o MIEMBRO_ADMIN.
      */
-    @PostMapping(
-            value = "/api/obras/{obraId}/capitulos",
-            consumes = MediaType.MULTIPART_FORM_DATA_VALUE
-    )
+    @PostMapping("/api/obras/{obraId}/capitulos/signed-urls")
     @PreAuthorize("hasAnyRole('MASTER', 'MIEMBRO_ADMIN')")
-    public ResponseEntity<CapituloResponseDTO> crearCapitulo(
+    public ResponseEntity<SignedUrlsResponseDTO> generarUrlsFirmadas(
             @PathVariable Long obraId,
-            @RequestPart("metadata") @Valid CapituloRequestDTO dto,
-            @RequestPart("paginas") List<MultipartFile> files
+            @RequestParam double numero,
+            @RequestBody @Valid List<SignedUrlRequestItem> archivos
     ) {
-        CapituloResponseDTO response = capituloService.crearCapitulo(obraId, dto.getNumero(), files);
+        SignedUrlsResponseDTO response = capituloService.generarUrlsFirmadas(obraId, numero, archivos);
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * POST /api/obras/{obraId}/capitulos/confirmar
+     * Fase 2 del flujo de subida directa a GCS.
+     * El frontend ya subió todas las imágenes a GCS con PUT y ahora envía
+     * las URLs públicas finales para que el backend persista el capítulo en la DB.
+     * Requiere rol MASTER o MIEMBRO_ADMIN.
+     */
+    @PostMapping("/api/obras/{obraId}/capitulos/confirmar")
+    @PreAuthorize("hasAnyRole('MASTER', 'MIEMBRO_ADMIN')")
+    public ResponseEntity<CapituloResponseDTO> confirmarCapitulo(
+            @PathVariable Long obraId,
+            @RequestBody @Valid ConfirmarCapituloRequestDTO request
+    ) {
+        CapituloResponseDTO response = capituloService.confirmarCapitulo(obraId, request);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 

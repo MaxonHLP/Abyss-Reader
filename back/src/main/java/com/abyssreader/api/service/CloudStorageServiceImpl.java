@@ -1,5 +1,7 @@
 package com.abyssreader.api.service;
 
+import com.abyssreader.api.dto.capitulo.SignedUrlRequestItem;
+import com.abyssreader.api.dto.capitulo.SignedUrlsResponseDTO;
 import com.google.cloud.storage.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -7,7 +9,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Implementación de StorageService sobre Google Cloud Storage.
@@ -85,5 +91,54 @@ public class CloudStorageServiceImpl implements StorageService {
         String blobName = fileUrl.substring(prefix.length());
         BlobId blobId = BlobId.of(bucketName, blobName);
         storage.delete(blobId);
+    }
+
+    /**
+     * Genera URLs firmadas V4 (válidas 15 minutos) para que el frontend pueda
+     * subir imágenes directamente a GCS con PUT, sin pasar por este servidor.
+     *
+     * Flujo:
+     *  1. Por cada archivo recibe {nombre, tipo}.
+     *  2. Genera un objectName único con UUID para evitar colisiones.
+     *  3. Firma una URL PUT para ese object con el Content-Type exacto.
+     *  4. Devuelve la URL firmada (para el PUT del frontend) + la URL pública final.
+     *
+     * ⚠ IMPORTANTE: el frontend DEBE usar exactamente el mismo Content-Type
+     *   al hacer el PUT. Si difiere, GCS rechazará la petición con 403.
+     */
+    @Override
+    public SignedUrlsResponseDTO generarUrlsFirmadas(List<SignedUrlRequestItem> archivos, String folderPath) {
+        List<SignedUrlsResponseDTO.SignedUrlItem> items = new ArrayList<>();
+
+        for (SignedUrlRequestItem archivo : archivos) {
+            // Generar nombre único preservando la extensión original
+            String extension = "";
+            String nombreOriginal = archivo.getNombre();
+            int dotIdx = nombreOriginal.lastIndexOf('.');
+            if (dotIdx >= 0) {
+                extension = nombreOriginal.substring(dotIdx); // ej: ".jpg"
+            }
+            String objectName = folderPath + UUID.randomUUID() + extension;
+
+            BlobInfo blobInfo = BlobInfo.newBuilder(BlobId.of(bucketName, objectName))
+                    .setContentType(archivo.getTipo())
+                    .build();
+
+            // Generar URL firmada V4 para PUT, válida 15 minutos, con Content-Type fijado
+            URL signedUrl = storage.signUrl(
+                    blobInfo,
+                    15,
+                    TimeUnit.MINUTES,
+                    Storage.SignUrlOption.withV4Signature(),
+                    Storage.SignUrlOption.httpMethod(HttpMethod.PUT),
+                    Storage.SignUrlOption.withContentType()
+            );
+
+            String publicUrl = String.format("https://storage.googleapis.com/%s/%s", bucketName, objectName);
+
+            items.add(new SignedUrlsResponseDTO.SignedUrlItem(signedUrl.toString(), publicUrl));
+        }
+
+        return new SignedUrlsResponseDTO(items);
     }
 }
