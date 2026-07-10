@@ -219,7 +219,7 @@ export default function ChapterReader() {
       obraId: capitulo.obraId,
       capituloId: capitulo.id,
     }).catch((err) => {
-      console.warn('[Tracking] No se pudo registrar el progreso:', err?.response?.status);
+      console.warn('[Tracking] No se pudo registrar el progreso:', err?.response?.status, err?.response?.data);
     });
   }, [capitulo?.id]);  // eslint-disable-line react-hooks/exhaustive-deps -- capitulo.obraId no cambia si capitulo.id no cambia
 
