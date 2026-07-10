@@ -137,10 +137,10 @@ const MasterDashboard = () => {
 
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full max-w-6xl mx-auto">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full max-w-6xl mx-auto items-start">
                 
                 {/* Generos */}
-                <div className="bg-abyss-bg-select-sec-master border border-abyss-border-select-sec-master rounded-2xl p-6 shadow-2xl flex flex-col h-full">
+                <div className="bg-abyss-bg-select-sec-master border border-abyss-border-select-sec-master rounded-2xl p-6 shadow-2xl flex flex-col h-auto">
                   <h3 className="text-2xl font-bold mb-6 text-abyss-text-select-sec-master uppercase tracking-wide border-b-2 border-abyss-border-select-sec-master pb-2">
                     Géneros
                   </h3>
@@ -160,7 +160,7 @@ const MasterDashboard = () => {
                 </div>
 
                 {/* Demografías */}
-                <div className="bg-abyss-bg-select-sec-master border border-abyss-border-select-sec-master rounded-2xl p-6 shadow-2xl flex flex-col h-full">
+                <div className="bg-abyss-bg-select-sec-master border border-abyss-border-select-sec-master rounded-2xl p-6 shadow-2xl flex flex-col h-auto">
                   <h3 className="text-2xl font-bold mb-6 text-abyss-text-select-sec-master uppercase tracking-wide border-b-2 border-abyss-border-select-sec-master pb-2">
                     Demografías
                   </h3>
@@ -180,7 +180,7 @@ const MasterDashboard = () => {
                 </div>
 
                 {/* Tipos */}
-                <div className="bg-abyss-bg-select-sec-master border border-abyss-border-select-sec-master rounded-2xl p-6 shadow-2xl flex flex-col h-full">
+                <div className="bg-abyss-bg-select-sec-master border border-abyss-border-select-sec-master rounded-2xl p-6 shadow-2xl flex flex-col h-auto">
                   <h3 className="text-2xl font-bold mb-6 text-abyss-text-select-sec-master uppercase tracking-wide border-b-2 border-abyss-border-select-sec-master pb-2">
                     Tipos
                   </h3>
