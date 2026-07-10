@@ -224,9 +224,9 @@ export default function Home() {
           <div className="relative mb-8 flex items-center justify-center max-w-5xl mx-auto">
             <button 
               onClick={() => handleScrollGeneros('left')}
-              className="absolute left-0 z-10 bg-black/30 hover:bg-black/50 text-white p-2 rounded-full hidden md:flex items-center justify-center h-10 w-10 -ml-5"
+              className="absolute left-1 md:-ml-5 z-10 bg-black/40 hover:bg-black/60 text-white p-1 md:p-2 rounded-full flex items-center justify-center h-8 w-8 md:h-10 md:w-10 pointer-events-auto"
             >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
+              <svg className="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
             </button>
 
             <div 
@@ -252,9 +252,9 @@ export default function Home() {
 
             <button 
               onClick={() => handleScrollGeneros('right')}
-              className="absolute right-0 z-10 bg-black/30 hover:bg-black/50 text-white p-2 rounded-full hidden md:flex items-center justify-center h-10 w-10 -mr-5"
+              className="absolute right-1 md:-mr-5 z-10 bg-black/40 hover:bg-black/60 text-white p-1 md:p-2 rounded-full flex items-center justify-center h-8 w-8 md:h-10 md:w-10 pointer-events-auto"
             >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+              <svg className="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
             </button>
           </div>
 

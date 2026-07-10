@@ -126,13 +126,13 @@ export default function UserProfile() {
 
       {/* ── Sección de perfil: avatar izq + nombre centro ── */}
       <div className="relative w-full max-w-5xl mx-auto px-2">
-        <div className="flex items-start gap-4 -mt-12">
+        <div className="flex flex-col md:flex-row items-center md:items-start gap-4 md:gap-6 -mt-16 md:-mt-12">
 
           {/* ── Columna izquierda: Avatar + descripción + botón ── */}
-          <div className="flex flex-col items-center gap-3 shrink-0 z-10">
+          <div className="flex flex-col items-center gap-3 shrink-0 z-10 w-full md:w-auto">
             {/* Avatar 2x (w-48 h-48 vs w-24 h-24 anterior) */}
             <div
-              className="w-48 h-48 rounded-full overflow-hidden border-4 shadow-2xl"
+              className="w-32 h-32 md:w-48 md:h-48 rounded-full overflow-hidden border-4 shadow-2xl"
               style={{ borderColor: 'var(--color-abyss-bg-png-perfil)' }}
             >
               <img
@@ -150,7 +150,7 @@ export default function UserProfile() {
             {/* Botón editar perfil */}
             <button
               onClick={() => setIsEditProfileOpen(true)}
-              className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_18px_rgba(0,235,219,0.3)]"
+              className="flex items-center justify-center gap-2 px-4 py-2 md:px-5 md:py-2.5 rounded-xl text-xs md:text-sm font-semibold transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_18px_rgba(0,235,219,0.3)] w-full max-w-[200px]"
               style={{
                 background: 'linear-gradient(135deg, #00EBDB22, #0099cc22)',
                 border: '1px solid rgba(0,235,219,0.35)',
@@ -166,7 +166,7 @@ export default function UserProfile() {
             {/* Botón cerrar sesión */}
             <button
               onClick={() => setIsLogoutModalOpen(true)}
-              className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_18px_rgba(235,0,0,0.3)] mt-2"
+              className="flex items-center justify-center gap-2 px-4 py-2 md:px-5 md:py-2.5 rounded-xl text-xs md:text-sm font-semibold transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_18px_rgba(235,0,0,0.3)] mt-2 w-full max-w-[200px]"
               style={{
                 background: 'linear-gradient(135deg, rgba(235,0,0,0.1), rgba(204,0,0,0.1))',
                 border: '1px solid rgba(235,0,0,0.35)',
@@ -181,9 +181,9 @@ export default function UserProfile() {
           </div>
 
           {/* ── Centro: Nombre de usuario ── */}
-          <div className="flex-1 flex justify-center pt-16">
+          <div className="flex-1 flex justify-center pt-2 md:pt-16">
             <h1
-              className="text-[1.7rem] font-bold text-center leading-tight"
+              className="text-2xl md:text-[1.7rem] font-bold text-center leading-tight"
               style={{ color: 'var(--color-abyss-text-capitulos)' }}
             >
               {user?.nombre ?? 'Lector'}
@@ -191,19 +191,19 @@ export default function UserProfile() {
           </div>
 
           {/* ── Espacio derecho (balanceo visual) ── */}
-          <div className="w-48 shrink-0" />
+          <div className="hidden md:block w-48 shrink-0" />
         </div>
       </div>
 
       {/* ── Tabs de navegación ── */}
-      <div className="flex justify-center gap-2 px-4 mt-2 mb-4">
+      <div className="flex justify-center gap-2 px-4 mt-2 mb-4 w-full max-w-lg mx-auto">
         {(['historial', 'guardados'] as TabActiva[]).map(tab => {
           const activo = tabActiva === tab;
           return (
             <button
               key={tab}
               onClick={() => setTabActiva(tab)}
-              className="px-8 py-2.5 rounded-t-lg font-semibold capitalize transition-all duration-200"
+              className="px-4 py-2 md:px-8 md:py-2.5 rounded-t-lg font-semibold capitalize transition-all duration-200 text-sm md:text-base flex-1 md:flex-none"
               style={
                 activo
                   ? {
@@ -251,11 +251,11 @@ export default function UserProfile() {
                       <img
                         src={item.obraPortada}
                         alt={item.obraTitulo}
-                        className="w-full h-40 object-cover"
+                        className="w-full h-32 sm:h-40 object-cover"
                         loading="lazy"
                       />
                     ) : (
-                      <div className="w-full h-40 flex items-center justify-center opacity-40" style={{ color: 'var(--color-abyss-text-card-historial)' }}>
+                      <div className="w-full h-32 sm:h-40 flex items-center justify-center opacity-40" style={{ color: 'var(--color-abyss-text-card-historial)' }}>
                         Sin portada
                       </div>
                     )}
@@ -282,14 +282,14 @@ export default function UserProfile() {
         {tabActiva === 'guardados' && (
           <section>
             {/* Sub-botones de filtro por estado */}
-            <div className="flex gap-3 mb-6 justify-center flex-wrap">
+            <div className="flex gap-2 md:gap-3 mb-6 justify-center flex-wrap">
               {(Object.keys(estadoLabels) as EstadoGuardado[]).map(estado => {
                 const activo = filtroEstado === estado;
                 return (
                   <button
                     key={estado}
                     onClick={() => setFiltroEstado(estado)}
-                    className="px-5 py-2 rounded-full text-sm font-semibold transition-all duration-200"
+                    className="px-3 py-1.5 md:px-5 md:py-2 rounded-full text-xs md:text-sm font-semibold transition-all duration-200"
                     style={
                       activo
                         ? {
@@ -320,7 +320,7 @@ export default function UserProfile() {
                 No tenés obras en "{estadoLabels[filtroEstado]}".
               </p>
             ) : (
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
                 {guardadosFiltrados.map(item => (
                   <Link
                     key={item.id}
@@ -333,11 +333,11 @@ export default function UserProfile() {
                       <img
                         src={item.obraPortada}
                         alt={item.obraTitulo}
-                        className="w-full h-48 object-cover"
+                        className="w-full h-40 sm:h-48 object-cover"
                         loading="lazy"
                       />
                     ) : (
-                      <div className="w-full h-48 flex items-center justify-center opacity-40" style={{ color: 'var(--color-abyss-text-card-historial)' }}>
+                      <div className="w-full h-40 sm:h-48 flex items-center justify-center opacity-40" style={{ color: 'var(--color-abyss-text-card-historial)' }}>
                         Sin portada
                       </div>
                     )}
