@@ -7,6 +7,7 @@ interface Obra {
   descripcion: string;
   portada?: string;
   likes: number;
+  vistas?: number;
 }
 
 interface CarouselProps {
@@ -87,11 +88,20 @@ export default function Carousel({ obras }: CarouselProps) {
               >
                 {obra.descripcion || 'Sin descripción.'}
               </p>
-              <div className="mt-4 md:mt-6 flex items-center space-x-2" style={{ color: 'var(--color-abyss-text-carrusel)' }}>
-                <svg className="w-4 h-4 md:w-5 md:h-5" fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M2 10.5a1.5 1.5 0 113 0v6a1.5 1.5 0 01-3 0v-6zM6 10.333v5.43a2 2 0 001.106 1.79l.05.025A4 4 0 008.943 18h5.416a2 2 0 001.962-1.608l1.2-6A2 2 0 0015.56 8H12V4a2 2 0 00-2-2 1 1 0 00-1 1v.667a4 4 0 01-.8 2.4L6.8 7.933a4 4 0 00-.8 2.4z" />
-                </svg>
-                <span className="font-semibold text-sm md:text-base">{obra.likes} Me gustas</span>
+              <div className="mt-4 md:mt-6 flex items-center space-x-4 md:space-x-6" style={{ color: 'var(--color-abyss-text-carrusel)' }}>
+                <div className="flex items-center space-x-1 md:space-x-2">
+                  <svg className="w-4 h-4 md:w-5 md:h-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M2 10.5a1.5 1.5 0 113 0v6a1.5 1.5 0 01-3 0v-6zM6 10.333v5.43a2 2 0 001.106 1.79l.05.025A4 4 0 008.943 18h5.416a2 2 0 001.962-1.608l1.2-6A2 2 0 0015.56 8H12V4a2 2 0 00-2-2 1 1 0 00-1 1v.667a4 4 0 01-.8 2.4L6.8 7.933a4 4 0 00-.8 2.4z" />
+                  </svg>
+                  <span className="font-semibold text-xs sm:text-sm md:text-base">{obra.likes} Me gustas</span>
+                </div>
+                <div className="flex items-center space-x-1 md:space-x-2">
+                  <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                  </svg>
+                  <span className="font-semibold text-xs sm:text-sm md:text-base">{obra.vistas || 0} Vistas</span>
+                </div>
               </div>
             </div>
           </div>

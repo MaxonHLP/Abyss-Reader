@@ -155,7 +155,7 @@ export default function Home() {
     <div 
       key={`reciente-${obra.id}`} 
       onClick={() => navigate(`/obra/${obra.titulo}`)}
-      className="bg-abyss-bg-card-gp rounded-xl overflow-hidden border border-abyss-border-card-gp hover:shadow-[0_0_20px_rgba(0,168,157,0.4)] transition-all duration-300 group cursor-pointer flex h-[160px] transform hover:-translate-y-1"
+      className="bg-abyss-bg-card-gp rounded-xl overflow-hidden border border-abyss-border-card-gp hover:shadow-[0_0_20px_rgba(0,168,157,0.4)] transition-all duration-300 group cursor-pointer flex h-[120px] md:h-[160px] transform hover:-translate-y-1"
     >
       <div className="w-1/3 relative overflow-hidden bg-abyss-bg-selecs h-full flex-shrink-0">
         {obra.portada ? (
@@ -170,15 +170,15 @@ export default function Home() {
           </div>
         )}
       </div>
-      <div className="w-2/3 p-4 flex flex-col bg-abyss-bg-card-gp relative z-10">
-        <h3 className="font-bold text-abyss-text-barra-busqueda line-clamp-2 text-sm md:text-base leading-snug mb-2 group-hover:text-white transition-colors">
+      <div className="w-2/3 p-3 md:p-4 flex flex-col bg-abyss-bg-card-gp relative z-10">
+        <h3 className="font-bold text-abyss-text-barra-busqueda line-clamp-2 text-xs sm:text-sm md:text-base leading-snug mb-1 md:mb-2 group-hover:text-white transition-colors">
           {obra.titulo}
         </h3>
-        <div className="flex-grow flex flex-col justify-end space-y-2">
+        <div className="flex-grow flex flex-col justify-end space-y-1 md:space-y-2">
           {obra.ultimosCapitulos && obra.ultimosCapitulos.length > 0 ? (
             obra.ultimosCapitulos.map((cap, index) => (
-              <div key={index} className="flex justify-between items-center text-xs">
-                <span className="text-abyss-text-name-option/90 font-medium bg-abyss-bg-item-select/50 px-2 py-0.5 rounded border border-abyss-border-item-select/50">
+              <div key={index} className="flex justify-between items-center text-[10px] md:text-xs">
+                <span className="text-abyss-text-name-option/90 font-medium bg-abyss-bg-item-select/50 px-1.5 md:px-2 py-0.5 rounded border border-abyss-border-item-select/50">
                   Cap. {cap.numero}
                 </span>
                 <span className="text-abyss-text-muted font-medium ml-1 truncate">
@@ -198,12 +198,12 @@ export default function Home() {
     <div className="min-h-screen" style={{ backgroundColor: 'var(--color-abyss-bg-principal)' }}>
       <Navbar />
 
-      <main className="pt-10 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto pb-16 space-y-20">
+      <main className="pt-6 md:pt-10 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto pb-16 space-y-12 md:space-y-20">
         
         {/* SECCIÓN 1: Los más gustados */}
         <section>
           <h1 
-            className="text-4xl font-black mb-8 text-center tracking-wider"
+            className="text-2xl sm:text-3xl md:text-4xl font-black mb-6 md:mb-8 text-center tracking-wider"
             style={{ color: 'var(--color-abyss-text-titles-principal)' }}
           >
             Los mas gustados
@@ -214,7 +214,7 @@ export default function Home() {
         {/* SECCIÓN 2: Los más vistos de su género */}
         <section>
           <h1 
-            className="text-4xl font-black mb-8 text-center tracking-wider"
+            className="text-2xl sm:text-3xl md:text-4xl font-black mb-6 md:mb-8 text-center tracking-wider"
             style={{ color: 'var(--color-abyss-text-titles-principal)' }}
           >
             Los mas vistos de su genero
@@ -238,7 +238,7 @@ export default function Home() {
                 <button
                   key={gen.id}
                   onClick={() => setSelectedGeneroId(gen.id)}
-                  className="whitespace-nowrap px-6 py-2 rounded-full font-bold transition-all shadow-md active:scale-95"
+                  className="whitespace-nowrap px-4 py-1.5 md:px-6 md:py-2 text-sm md:text-base rounded-full font-bold transition-all shadow-md active:scale-95"
                   style={{
                     backgroundColor: selectedGeneroId === gen.id ? 'var(--color-abyss-text-filter-genero)' : 'var(--color-abyss-bg-filter-genero)',
                     color: selectedGeneroId === gen.id ? 'var(--color-abyss-bg-filter-genero)' : 'var(--color-abyss-text-filter-genero)',
@@ -259,14 +259,14 @@ export default function Home() {
           </div>
 
           {/* Grid de resultados de género */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 xl:gap-8">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-6 xl:gap-8">
             {obrasGenero.map(renderObraCard)}
           </div>
 
-          <div className="mt-10 flex justify-center">
+          <div className="mt-8 md:mt-10 flex justify-center">
             <button
               onClick={() => navigate(`/biblioteca?generoId=${selectedGeneroId}&sort=vistas,desc`)}
-              className="px-8 py-3 rounded-full font-bold shadow-lg transition-transform hover:scale-105 active:scale-95"
+              className="px-6 py-2 md:px-8 md:py-3 text-sm md:text-base rounded-full font-bold shadow-lg transition-transform hover:scale-105 active:scale-95"
               style={{
                 backgroundColor: 'var(--color-abyss-bg-filter-genero)',
                 color: 'var(--color-abyss-text-filter-genero)'
@@ -280,7 +280,7 @@ export default function Home() {
         {/* SECCIÓN 3: Últimos actualizados */}
         <section>
           <h1 
-            className="text-4xl font-black mb-10 text-center tracking-wider"
+            className="text-2xl sm:text-3xl md:text-4xl font-black mb-6 md:mb-10 text-center tracking-wider"
             style={{ color: 'var(--color-abyss-text-titles-principal)' }}
           >
             Ultimos actualizados
@@ -291,10 +291,10 @@ export default function Home() {
           </div>
 
           {hasMoreRecientes && (
-            <div className="mt-10 flex justify-center">
+            <div className="mt-8 md:mt-10 flex justify-center">
               <button
                 onClick={handleVerMasRecientes}
-                className="px-8 py-3 rounded-full font-bold shadow-lg transition-transform hover:scale-105 active:scale-95 bg-white text-black"
+                className="px-6 py-2 md:px-8 md:py-3 text-sm md:text-base rounded-full font-bold shadow-lg transition-transform hover:scale-105 active:scale-95 bg-white text-black"
                 style={{
                   backgroundColor: 'var(--color-abyss-text-titles-principal)',
                   color: 'var(--color-abyss-bg-principal)'
