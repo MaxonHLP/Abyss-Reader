@@ -35,9 +35,10 @@ public class CapituloController {
     public ResponseEntity<SignedUrlsResponseDTO> generarUrlsFirmadas(
             @PathVariable Long obraId,
             @RequestParam double numero,
+            @RequestParam(required = false, defaultValue = "false") boolean esEdicion,
             @RequestBody @Valid List<SignedUrlRequestItem> archivos
     ) {
-        SignedUrlsResponseDTO response = capituloService.generarUrlsFirmadas(obraId, numero, archivos);
+        SignedUrlsResponseDTO response = capituloService.generarUrlsFirmadas(obraId, numero, archivos, esEdicion);
         return ResponseEntity.ok(response);
     }
 

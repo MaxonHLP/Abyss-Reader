@@ -318,7 +318,7 @@ const EditChapterModal = ({
         const { data: signedData } = await api.post<{
           items: { uploadUrl: string; publicUrl: string }[];
         }>(
-          `/obras/${obraId}/capitulos/signed-urls?numero=${capituloSeleccionado.numero}`,
+          `/obras/${obraId}/capitulos/signed-urls?numero=${capituloSeleccionado.numero}&esEdicion=true`,
           archivosPayload
         );
 

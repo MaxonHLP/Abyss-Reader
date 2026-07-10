@@ -44,13 +44,14 @@ public class CapituloService {
      * Fase 1 del flujo de Signed URLs: genera URLs firmadas temporales (15 min) para que
      * el frontend suba las imágenes directamente a GCS sin pasar por este servidor.
      *
-     * @param obraId   ID de la obra a la que pertenece el capítulo
-     * @param numero   número del capítulo (para validación de duplicado y ruta en bucket)
-     * @param archivos lista de descriptores de archivo ({nombre, tipo}) enviados por el frontend
+     * @param obraId    ID de la obra a la que pertenece el capítulo
+     * @param numero    número del capítulo (para validación de duplicado y ruta en bucket)
+     * @param archivos  lista de descriptores de archivo ({nombre, tipo}) enviados por el frontend
+     * @param esEdicion indica si se está pidiendo firmas para editar un capítulo existente
      * @return DTO con lista de pares (uploadUrl firmada, publicUrl final)
      */
-    public SignedUrlsResponseDTO generarUrlsFirmadas(Long obraId, double numero, List<SignedUrlRequestItem> archivos) {
-        if (capituloRepository.existsByObraIdAndNumero(obraId, numero)) {
+    public SignedUrlsResponseDTO generarUrlsFirmadas(Long obraId, double numero, List<SignedUrlRequestItem> archivos, boolean esEdicion) {
+        if (!esEdicion && capituloRepository.existsByObraIdAndNumero(obraId, numero)) {
             throw new IllegalArgumentException("Ya existe el capítulo " + numero + " para esta obra.");
         }
         String folderPath = String.format("obras/%d/capitulos/%.0f/", obraId, numero);
