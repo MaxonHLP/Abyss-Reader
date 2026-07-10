@@ -30,8 +30,12 @@ public class HistorialController {
      * Llamado silenciosamente por el ChapterReader al cargar un capítulo.
      */
     @PostMapping("/tracking")
-    public ResponseEntity<HistorialResponseDTO> registrarProgreso(
-            @Valid @RequestBody HistorialRequestDTO request) {
+    public ResponseEntity<?> registrarProgreso(
+            @Valid @RequestBody HistorialRequestDTO request, org.springframework.validation.BindingResult result) {
+        
+        if (result.hasErrors()) {
+            return ResponseEntity.badRequest().body(result.getAllErrors());
+        }
 
         String mail = SecurityContextHolder.getContext().getAuthentication().getName();
         HistorialResponseDTO response = historialService.registrarProgreso(mail, request);
