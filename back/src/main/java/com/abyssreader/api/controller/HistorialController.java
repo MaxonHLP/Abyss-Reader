@@ -34,12 +34,19 @@ public class HistorialController {
             @Valid @RequestBody HistorialRequestDTO request, org.springframework.validation.BindingResult result) {
         
         if (result.hasErrors()) {
+            System.err.println("Tracking request tiene errores de validacion: " + result.getAllErrors());
             return ResponseEntity.badRequest().body(result.getAllErrors());
         }
 
-        String mail = SecurityContextHolder.getContext().getAuthentication().getName();
-        HistorialResponseDTO response = historialService.registrarProgreso(mail, request);
-        return ResponseEntity.ok(response);
+        try {
+            String mail = SecurityContextHolder.getContext().getAuthentication().getName();
+            HistorialResponseDTO response = historialService.registrarProgreso(mail, request);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            System.err.println("Error en HistorialService.registrarProgreso: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(400).body("Error interno: " + e.getMessage());
+        }
     }
 
     /**
