@@ -164,7 +164,7 @@ export default function Catalog() {
             </button>
             
             <div className={`transition-all duration-300 ease-in-out overflow-hidden ${filtrosOpen ? 'max-h-[1000px] opacity-100 border-t border-abyss-border-input' : 'max-h-0 opacity-0'}`}>
-              <div className="p-6 bg-abyss-bg-filter-selecs grid grid-cols-1 sm:grid-cols-3 gap-8">
+              <div className="p-4 md:p-6 bg-abyss-bg-filter-selecs grid grid-cols-1 sm:grid-cols-3 gap-6 md:gap-8">
                 
                 {/* Tipo */}
                 <div>
@@ -239,8 +239,8 @@ export default function Catalog() {
             </button>
             
             <div className={`transition-all duration-300 ease-in-out overflow-hidden ${generosOpen ? 'max-h-[2000px] opacity-100 border-t border-abyss-border-input' : 'max-h-0 opacity-0'}`}>
-              <div className="p-6 bg-abyss-bg-filter-selecs">
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-y-4 gap-x-6">
+              <div className="p-4 md:p-6 bg-abyss-bg-filter-selecs">
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-y-4 gap-x-3 md:gap-x-6">
                   {generos.map(genero => (
                     <label key={genero.id} className="flex items-center space-x-3 cursor-pointer group">
                       <input
@@ -259,9 +259,9 @@ export default function Catalog() {
         </div>
 
         {/* 4. Grid de Resultados */}
-        <div className="mt-12">
+        <div className="mt-8 md:mt-12 px-2 md:px-0">
           {obras.length > 0 ? (
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 xl:gap-8">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-6 xl:gap-8">
               {obras.map(obra => (
                 <div 
                   key={obra.id} 
@@ -277,20 +277,20 @@ export default function Catalog() {
                       />
                     ) : (
                       <div className="w-full h-full flex flex-col items-center justify-center text-abyss-text-muted bg-abyss-bg-selecs/50">
-                        <svg className="w-12 h-12 mb-2 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-10 h-10 md:w-12 md:h-12 mb-2 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                         </svg>
-                        <span className="text-sm font-medium">Sin portada</span>
+                        <span className="text-xs md:text-sm font-medium">Sin portada</span>
                       </div>
                     )}
                     
                     {/* Gradient Overlay */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-[#012533]/90 via-transparent to-transparent opacity-60 group-hover:opacity-80 transition-opacity duration-300" />
+                    <div className="absolute inset-0 bg-linear-to-t from-[#012533]/90 via-transparent to-transparent opacity-60 group-hover:opacity-80 transition-opacity duration-300" />
 
                     {/* Top Badges */}
-                    <div className="absolute top-2 left-2 flex flex-col gap-1">
+                    <div className="absolute top-1.5 left-1.5 md:top-2 md:left-2 flex flex-col gap-1">
                       {obra.tipo && (
-                        <span className="bg-abyss-bg-text-card-gp/90 text-abyss-text-card-gp text-xs font-black px-2.5 py-1 rounded shadow backdrop-blur-sm tracking-wide">
+                        <span className="bg-abyss-bg-text-card-gp/90 text-abyss-text-card-gp text-[10px] md:text-xs font-black px-1.5 py-0.5 md:px-2.5 md:py-1 rounded shadow backdrop-blur-sm tracking-wide">
                           {obra.tipo.nombre}
                         </span>
                       )}
@@ -298,13 +298,13 @@ export default function Catalog() {
                   </div>
                   
                   {/* Card Info Section */}
-                  <div className="p-4 flex-grow flex flex-col justify-between bg-abyss-bg-card-gp relative z-10">
+                  <div className="p-2.5 sm:p-4 flex-grow flex flex-col justify-between bg-abyss-bg-card-gp relative z-10">
                     <div>
-                      <h3 className="font-bold text-abyss-text-barra-busqueda line-clamp-2 text-sm md:text-base leading-snug mb-1 group-hover:text-white transition-colors">
+                      <h3 className="font-bold text-abyss-text-barra-busqueda line-clamp-2 text-sm md:text-base leading-snug mb-0.5 md:mb-1 group-hover:text-white transition-colors">
                         {obra.titulo}
                       </h3>
                       {obra.demografia && (
-                        <span className="text-xs text-abyss-text-name-option/90 font-medium">
+                        <span className="text-[10px] md:text-xs text-abyss-text-name-option/90 font-medium">
                           {obra.demografia.nombre}
                         </span>
                       )}
