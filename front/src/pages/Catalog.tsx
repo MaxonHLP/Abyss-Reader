@@ -111,7 +111,7 @@ export default function Catalog() {
       <main className="pt-8 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto pb-12">
         
         {/* 2. Motor de búsqueda y Ordenamiento */}
-        <div className="flex flex-col md:flex-row justify-center items-center gap-4 mb-8 max-w-4xl mx-auto">
+        <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-8 w-full">
           <div className="relative w-full md:flex-1 group">
             <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
               <svg className="h-5 w-5 text-abyss-text-barra-busqueda opacity-70 group-focus-within:opacity-100 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -149,7 +149,7 @@ export default function Catalog() {
         </div>
 
         {/* Controladores de filtro */}
-        <div className="space-y-4 max-w-4xl mx-auto mb-10">
+        <div className="space-y-4 w-full mb-10">
           
           {/* Primer selector: Filtros Generales */}
           <div className="rounded-lg overflow-hidden bg-abyss-bg-selecs border border-abyss-border-input shadow-md">
