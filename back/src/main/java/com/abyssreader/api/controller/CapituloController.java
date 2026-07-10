@@ -3,6 +3,7 @@ package com.abyssreader.api.controller;
 import com.abyssreader.api.dto.capitulo.CapituloListItemDTO;
 import com.abyssreader.api.dto.capitulo.CapituloResponseDTO;
 import com.abyssreader.api.dto.capitulo.ConfirmarCapituloRequestDTO;
+import com.abyssreader.api.dto.capitulo.EditarCapituloRequestDTO;
 import com.abyssreader.api.dto.capitulo.SignedUrlRequestItem;
 import com.abyssreader.api.dto.capitulo.SignedUrlsResponseDTO;
 import com.abyssreader.api.service.CapituloService;
@@ -83,27 +84,21 @@ public class CapituloController {
 
     /**
      * PUT /api/capitulos/{id}
-     * Edita un capítulo existente usando la estrategia de Payload Mixto + Hard Delete.
+     * Actualiza un capítulo existente.
      *
-     * <p>El cliente envía un multipart con:
-     * <ul>
-     *   <li>{@code ordenFinal} – lista ordenada de URLs existentes o el token "NUEVO".</li>
-     *   <li>{@code archivosNuevos} – archivos nuevos (opcional; uno por cada token "NUEVO").</li>
-     * </ul>
+     * <p>El cliente envía un JSON con la lista final y ordenada de URLs públicas de GCS.
+     * El frontend se encarga de subir las imágenes nuevas directamente a GCS mediante
+     * Signed URLs antes de llamar a este endpoint.
      *
      * Requiere rol MASTER, MIEMBRO_ADMIN o MIEMBRO.
      */
-    @PutMapping(
-            value = "/api/capitulos/{id}",
-            consumes = MediaType.MULTIPART_FORM_DATA_VALUE
-    )
+    @PutMapping("/api/capitulos/{id}")
     @PreAuthorize("hasAnyRole('MASTER', 'MIEMBRO_ADMIN', 'MIEMBRO')")
     public ResponseEntity<CapituloResponseDTO> editarCapitulo(
             @PathVariable Long id,
-            @RequestPart("ordenFinal") List<String> ordenFinal,
-            @RequestPart(value = "archivosNuevos", required = false) List<MultipartFile> archivosNuevos
+            @RequestBody @Valid EditarCapituloRequestDTO requestDTO
     ) {
-        CapituloResponseDTO response = capituloService.editarCapitulo(id, ordenFinal, archivosNuevos);
+        CapituloResponseDTO response = capituloService.editarCapitulo(id, requestDTO);
         return ResponseEntity.ok(response);
     }
 

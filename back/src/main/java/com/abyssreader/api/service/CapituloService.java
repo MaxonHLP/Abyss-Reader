@@ -3,6 +3,7 @@ package com.abyssreader.api.service;
 import com.abyssreader.api.dto.capitulo.CapituloListItemDTO;
 import com.abyssreader.api.dto.capitulo.CapituloResponseDTO;
 import com.abyssreader.api.dto.capitulo.ConfirmarCapituloRequestDTO;
+import com.abyssreader.api.dto.capitulo.EditarCapituloRequestDTO;
 import com.abyssreader.api.dto.capitulo.SignedUrlRequestItem;
 import com.abyssreader.api.dto.capitulo.SignedUrlsResponseDTO;
 import com.abyssreader.api.entity.Capitulo;
@@ -15,7 +16,6 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.Authentication;
 import com.abyssreader.api.repository.CapituloLeidoRepository;
@@ -38,35 +38,7 @@ public class CapituloService {
     private final CapituloLeidoRepository capituloLeidoRepository;
     private final UsuarioRepository usuarioRepository;
 
-    /**
-     * Crea un nuevo capítulo para una obra, subiendo todas las páginas a GCS en orden.
-     * Se recupera la Obra por proxy (getReferenceById) para evitar un SELECT innecesario.
-     */
-    @Transactional
-    public CapituloResponseDTO crearCapitulo(Long obraId, double numero, List<MultipartFile> paginas) {
-        if (capituloRepository.existsByObraIdAndNumero(obraId, numero)) {
-            throw new IllegalArgumentException("Ya existe el capítulo " + numero + " para esta obra.");
-        }
 
-        // Proxy de Obra: no hace SELECT hasta que se accede a un campo; el INSERT validará la FK
-        Obra obra = obraRepository.getReferenceById(obraId);
-
-        Capitulo capitulo = new Capitulo();
-        capitulo.setObra(obra);
-        capitulo.setNumero(numero);
-
-        // Subida secuencial de páginas para preservar el orden
-        String folderPath = String.format("obras/%d/capitulos/%.0f/", obraId, numero);
-        List<String> urls = new ArrayList<>();
-        for (MultipartFile pagina : paginas) {
-            String url = storageService.uploadFile(pagina, folderPath);
-            urls.add(url);
-        }
-        capitulo.setPaginasUrls(urls);
-
-        Capitulo guardado = capituloRepository.save(capitulo);
-        return mapToDTO(guardado);
-    }
 
     /**
      * Fase 1 del flujo de Signed URLs: genera URLs firmadas temporales (15 min) para que
@@ -148,71 +120,51 @@ public class CapituloService {
     }
 
     /**
-     * Edita un capítulo existente usando la estrategia de Payload Mixto + Hard Delete.
+     * Edita un capítulo existente. Recibe la lista final y ordenada de URLs públicas
+     * de GCS — el frontend ya subió las imágenes nuevas directamente al bucket antes
+     * de llamar a este endpoint (flujo Signed URLs).
      *
-     * <p>El cliente envía:
-     * <ul>
-     *   <li>{@code ordenFinal} – lista ordenada donde cada elemento es una URL existente
-     *       (que se conserva) o el token literal {@code "NUEVO"} (página nueva a subir).</li>
-     *   <li>{@code archivosNuevos} – archivos correspondientes a los tokens NUEVO, en el
-     *       mismo orden en que aparecen en {@code ordenFinal}.</li>
-     * </ul>
+     * <p>Las URLs que ya no están en la lista nueva son borradas de GCS (Hard Delete).
+     * Luego se reemplaza la colección {@code paginasUrls} del capítulo en bloque.
      *
-     * <p>Pasos:
-     * <ol>
-     *   <li><b>Hard Delete</b>: borra de GCS toda URL actual que no esté en {@code ordenFinal}.</li>
-     *   <li><b>Ensamblaje</b>: recorre {@code ordenFinal} y reemplaza cada token NUEVO
-     *       por la URL del archivo recién subido.</li>
-     *   <li><b>Persistencia</b>: limpia {@code paginasUrls} y las reemplaza en bloque.</li>
-     * </ol>
-     *
-     * @param id             ID del capítulo a editar
-     * @param ordenFinal     lista ordenada de URLs existentes y tokens "NUEVO"
-     * @param archivosNuevos archivos a subir para cada token "NUEVO" (puede ser null si no hay nuevos)
+     * @param id  ID del capítulo a editar
+     * @param dto DTO con el nuevo número (opcional) y la lista ordenada de URLs finales
      * @return DTO actualizado del capítulo
      */
     @Transactional
-    public CapituloResponseDTO editarCapitulo(Long id,
-                                              List<String> ordenFinal,
-                                              List<MultipartFile> archivosNuevos) {
+    public CapituloResponseDTO editarCapitulo(Long id, EditarCapituloRequestDTO dto) {
 
-        // Recuperar capítulo o lanzar 404
+        // 1. Recuperar capítulo o lanzar 404
         Capitulo capitulo = capituloRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(
                         "Capítulo con ID " + id + " no encontrado"));
 
-        // Paso 1 – Hard Delete: eliminar de GCS las páginas que el cliente descartó
-        List<String> urlsActuales = capitulo.getPaginasUrls();
-        for (String urlAntigua : urlsActuales) {
-            if (!ordenFinal.contains(urlAntigua)) {
-                storageService.deleteFile(urlAntigua);
+        // 2. Actualizar número si viene en el DTO
+        if (dto.getNumero() != null) {
+            capitulo.setNumero(dto.getNumero());
+        }
+
+        // 3. Hard Delete: borrar de GCS las páginas que el cliente descartó
+        List<String> urlsNuevas = dto.getPaginasUrls();
+        for (String urlAntigua : capitulo.getPaginasUrls()) {
+            if (!urlsNuevas.contains(urlAntigua)) {
+                try {
+                    storageService.deleteFile(urlAntigua);
+                } catch (Exception e) {
+                    // Loguear pero no abortar la transacción: el archivo puede no existir
+                    System.err.println("[GCS] No se pudo borrar página descartada: "
+                            + urlAntigua + " - " + e.getMessage());
+                }
             }
         }
 
-        // Paso 2 & 3 – Ensamblaje: construir la nueva lista respetando el orden indicado
-        List<String> nuevasUrls = new ArrayList<>();
-        int indexNuevo = 0;
-        String folderPath = String.format("obras/%d/capitulos/%.0f/",
-                capitulo.getObra().getId(), capitulo.getNumero());
-
-        for (String token : ordenFinal) {
-            if (token.contains("http")) {
-                // URL existente conservada → se agrega directamente
-                nuevasUrls.add(token);
-            } else if ("NUEVO".equals(token)) {
-                // Página nueva → subir y obtener URL
-                MultipartFile archivo = archivosNuevos.get(indexNuevo);
-                String nuevaUrl = storageService.uploadFile(archivo, folderPath);
-                nuevasUrls.add(nuevaUrl);
-                indexNuevo++;
-            }
-        }
-
-        // Paso 4 – Persistencia: reemplazar la colección en la entidad ya gestionada
+        // 4. Reemplazar la colección en la entidad ya gestionada por JPA
+        //    @ElementCollection se borra y re-inserta en bloque al hacer clear() + addAll()
+        //    dentro de la misma transacción, respetando @OrderColumn
         capitulo.getPaginasUrls().clear();
-        capitulo.getPaginasUrls().addAll(nuevasUrls);
-        Capitulo guardado = capituloRepository.save(capitulo);
+        capitulo.getPaginasUrls().addAll(urlsNuevas);
 
+        Capitulo guardado = capituloRepository.save(capitulo);
         return mapToDTO(guardado);
     }
 

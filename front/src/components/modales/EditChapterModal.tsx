@@ -287,7 +287,7 @@ const EditChapterModal = ({
     }
   };
 
-  // ── Ensamblaje de FormData y envío ────────────────────────────────────────────
+  // ── Ensamblaje y envío via Signed URLs ───────────────────────────────────
   const handleGuardar = async () => {
     if (!capituloSeleccionado) {
       setError('Seleccioná un capítulo primero.');
@@ -300,36 +300,68 @@ const EditChapterModal = ({
 
     setIsLoading(true);
     setError(null);
-    const totalNuevas = items.filter((i) => i.tipo === 'nueva').length;
-    setProgreso(
-      `Guardando${totalNuevas > 0
-        ? ` (subiendo ${totalNuevas} imagen${totalNuevas > 1 ? 'es' : ''} nueva${totalNuevas > 1 ? 's' : ''})`
-        : ''}...`
-    );
+
+    const itemsNuevos = items.filter((i) => i.tipo === 'nueva' && i.archivoFisico);
 
     try {
-      const formData = new FormData();
-      const ordenFinalArray: string[] = [];
-      const archivosNuevos: File[] = [];
+      // ── Fase 1: Pedir URLs firmadas para las imágenes NUEVAS ──────────────
+      let urlsFinales: string[];
 
-      items.forEach((item) => {
-        if (item.tipo === 'vieja' && item.urlBd) {
-          ordenFinalArray.push(item.urlBd);
-        } else if (item.tipo === 'nueva' && item.archivoFisico) {
-          ordenFinalArray.push('NUEVO');
-          archivosNuevos.push(item.archivoFisico);
-        }
+      if (itemsNuevos.length > 0) {
+        setProgreso(`Generando acceso seguro para ${itemsNuevos.length} imagen${itemsNuevos.length > 1 ? 'es' : ''} nueva${itemsNuevos.length > 1 ? 's' : ''}...`);
+
+        const archivosPayload = itemsNuevos.map((i) => ({
+          nombre: i.archivoFisico!.name,
+          tipo: i.archivoFisico!.type,
+        }));
+
+        const { data: signedData } = await api.post<{
+          items: { uploadUrl: string; publicUrl: string }[];
+        }>(
+          `/obras/${obraId}/capitulos/signed-urls?numero=${capituloSeleccionado.numero}`,
+          archivosPayload
+        );
+
+        // ── Fase 2: Subida paralela directa a GCS ──────────────────────────
+        setProgreso(`Subiendo ${itemsNuevos.length} imagen${itemsNuevos.length > 1 ? 'es' : ''} directamente a la nube...`);
+
+        const uploadedUrls = await Promise.all(
+          signedData.items.map((signedItem, idx) =>
+            fetch(signedItem.uploadUrl, {
+              method: 'PUT',
+              // ⚠ El Content-Type DEBE coincidir exactamente con el firmado en la Fase 1
+              headers: { 'Content-Type': itemsNuevos[idx].archivoFisico!.type },
+              body: itemsNuevos[idx].archivoFisico,
+            }).then((res) => {
+              if (!res.ok) {
+                throw new Error(
+                  `Error al subir imagen nueva ${idx + 1}: ${res.status} ${res.statusText}`
+                );
+              }
+              return signedItem.publicUrl;
+            })
+          )
+        );
+
+        // Ensamblar lista final respetando el orden del estado (viejas + nuevas intercaladas)
+        let newIdx = 0;
+        urlsFinales = items.map((item) => {
+          if (item.tipo === 'vieja' && item.urlBd) return item.urlBd;
+          // tipo === 'nueva': asignar la URL pública que acaba de subir
+          return uploadedUrls[newIdx++];
+        });
+      } else {
+        // Sin imágenes nuevas: solo reordenado / eliminado de viejas
+        urlsFinales = items
+          .filter((i) => i.tipo === 'vieja' && i.urlBd)
+          .map((i) => i.urlBd!);
+      }
+
+      // ── Fase 3: Notificar al backend con las URLs finales ─────────────────
+      setProgreso('Guardando capítulo...');
+      await api.put(`/capitulos/${capituloSeleccionado.id}`, {
+        paginasUrls: urlsFinales,
       });
-
-      // Enviar ordenFinal como JSON Blob → Spring lo deserializa con Jackson a List<String>
-      formData.append(
-        'ordenFinal',
-        new Blob([JSON.stringify(ordenFinalArray)], { type: 'application/json' })
-      );
-      archivosNuevos.forEach((file) => formData.append('archivosNuevos', file));
-
-      // Sin Content-Type manual — el browser añade 'multipart/form-data; boundary=...'
-      await api.put(`/capitulos/${capituloSeleccionado.id}`, formData);
 
       setProgreso(null);
       onSuccess();
@@ -341,8 +373,9 @@ const EditChapterModal = ({
       const msg =
         (typeof raw === 'object' && raw !== null && 'message' in raw ? raw.message : undefined) ||
         (typeof raw === 'string' ? raw : undefined) ||
+        (err instanceof Error ? err.message : undefined) ||
         'Ocurrió un error al guardar los cambios.';
-      setError(msg);
+      setError(msg ?? 'Ocurrió un error al guardar los cambios.');
       setProgreso(null);
     } finally {
       setIsLoading(false);
