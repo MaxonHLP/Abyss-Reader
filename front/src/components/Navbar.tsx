@@ -11,13 +11,13 @@ export default function Navbar() {
 
   const getRoleNav = () => {
     if (!isAuthenticated || !user || user.rol === 'LECTOR') {
-      return { text: 'grupos', url: '/grupos' };
+      return { text: 'grupos', textMobile: 'grupos', url: '/grupos' };
     } else if (user.rol === 'MIEMBRO_ADMIN' || user.rol === 'MIEMBRO') {
-      return { text: 'Ver mi grupo', url: `/grupos/${user.grupoId || ''}` };
+      return { text: 'Ver mi grupo', textMobile: 'mi grupo', url: `/grupos/${user.grupoId || ''}` };
     } else if (user.rol === 'MASTER') {
-      return { text: 'observar mis dominios', url: '/master' };
+      return { text: 'observar mis dominios', textMobile: 'mis dominios', url: '/master' };
     }
-    return { text: 'grupos', url: '/grupos' };
+    return { text: 'grupos', textMobile: 'grupos', url: '/grupos' };
   };
 
   const handleSearch = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -44,16 +44,17 @@ export default function Navbar() {
           className="font-bold cursor-pointer hover:brightness-110 transition uppercase tracking-wide text-[10px] sm:text-xs md:text-base whitespace-nowrap"
           style={{ color: 'var(--color-abyss-navbar-text)' }}
         >
-          {navInfo.text}
+          <span className="md:hidden">{navInfo.textMobile}</span>
+          <span className="hidden md:inline">{navInfo.text}</span>
         </button>
       </div>
 
-      {/* Centro (Oculto en celular) */}
-      <div className="hidden md:flex justify-center md:absolute md:left-1/2 md:transform md:-translate-x-1/2">
+      {/* Centro */}
+      <div className="flex justify-center md:absolute md:left-1/2 md:transform md:-translate-x-1/2">
         <img 
           src={iconTitle} 
           alt="Title" 
-          className="h-20 w-auto cursor-pointer" 
+          className="h-10 sm:h-12 md:h-20 w-auto cursor-pointer" 
           onClick={() => navigate('/')}
         />
       </div>
