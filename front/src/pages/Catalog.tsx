@@ -164,10 +164,10 @@ export default function Catalog() {
             </button>
             
             <div className={`transition-all duration-300 ease-in-out overflow-hidden ${filtrosOpen ? 'max-h-[1000px] opacity-100 border-t border-abyss-border-input' : 'max-h-0 opacity-0'}`}>
-              <div className="p-4 md:p-6 bg-abyss-bg-filter-selecs grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+              <div className="p-4 md:p-6 bg-abyss-bg-filter-selecs flex flex-wrap justify-center sm:justify-start lg:justify-evenly gap-8 md:gap-12">
                 
                 {/* Tipo */}
-                <div>
+                <div className="flex-1 min-w-[200px] max-w-[320px]">
                   <h3 className="text-abyss-title-option bg-abyss-bg-title-option px-4 py-1.5 mb-4 rounded font-bold uppercase tracking-wider text-sm shadow-sm inline-block">Tipo</h3>
                   <div className="flex flex-col space-y-3">
                     {tipos.map(tipo => (
@@ -185,7 +185,7 @@ export default function Catalog() {
                 </div>
 
                 {/* Demografía */}
-                <div>
+                <div className="flex-1 min-w-[200px] max-w-[320px]">
                   <h3 className="text-abyss-title-option bg-abyss-bg-title-option px-4 py-1.5 mb-4 rounded font-bold uppercase tracking-wider text-sm shadow-sm inline-block">Demografía</h3>
                   <div className="flex flex-col space-y-3">
                     {demografias.map(demo => (
@@ -203,7 +203,7 @@ export default function Catalog() {
                 </div>
 
                 {/* Estado */}
-                <div>
+                <div className="flex-1 min-w-[200px] max-w-[320px]">
                   <h3 className="text-abyss-title-option bg-abyss-bg-title-option px-4 py-1.5 mb-4 rounded font-bold uppercase tracking-wider text-sm shadow-sm inline-block">Estado</h3>
                   <div className="flex flex-col space-y-3">
                     {['En emisión', 'Finalizado', 'Pausado'].map((estadoString, index) => {
