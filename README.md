@@ -13,7 +13,7 @@ Abyss Reader es una plataforma web para la lectura y gestión de mangas , manhwa
 ### Backend (`/back`)
 * **Java** con **Spring Boot**
 * **Spring Data JPA** / **Hibernate** (Mapeo objeto-relacional)
-* **MySQL** (Base de datos relacional)
+* **PostgreSQL** (Base de datos relacional)
 * **Spring Security** (Autenticación y Autorización)
 
 ---
