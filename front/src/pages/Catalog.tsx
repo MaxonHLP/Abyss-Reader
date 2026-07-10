@@ -164,10 +164,10 @@ export default function Catalog() {
             </button>
             
             <div className={`transition-all duration-300 ease-in-out overflow-hidden ${filtrosOpen ? 'max-h-[1000px] opacity-100 border-t border-abyss-border-input' : 'max-h-0 opacity-0'}`}>
-              <div className="p-4 md:p-6 bg-abyss-bg-filter-selecs flex flex-wrap justify-center sm:justify-start lg:justify-evenly gap-8 md:gap-12">
+              <div className="p-4 md:p-6 bg-abyss-bg-filter-selecs flex flex-wrap justify-start items-start gap-6 md:gap-10">
                 
                 {/* Tipo */}
-                <div className="flex-1 min-w-[200px] max-w-[320px]">
+                <div className="min-w-[180px] flex-1">
                   <h3 className="text-abyss-title-option bg-abyss-bg-title-option px-4 py-1.5 mb-4 rounded font-bold uppercase tracking-wider text-sm shadow-sm inline-block">Tipo</h3>
                   <div className="flex flex-col space-y-3">
                     {tipos.map(tipo => (
