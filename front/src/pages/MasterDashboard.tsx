@@ -137,7 +137,7 @@ const MasterDashboard = () => {
 
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-8 w-full items-stretch px-2 md:px-0">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-8 w-full items-start px-2 md:px-0">
                 
                 {/* Generos */}
                 <div className="bg-abyss-bg-select-sec-master border border-abyss-border-select-sec-master rounded-2xl p-4 md:p-6 shadow-2xl flex flex-col h-auto">
