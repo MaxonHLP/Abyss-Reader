@@ -27,9 +27,9 @@ export default function Groups() {
     <div className="min-h-screen font-sans" style={{ backgroundColor: 'var(--color-abyss-bg-principal)' }}>
       <Navbar />
 
-      <main className="pt-10 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto pb-16 space-y-12">
+      <main className="pt-6 md:pt-10 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto pb-16 space-y-8 md:space-y-12">
         <h1 
-          className="text-4xl font-black text-center tracking-wider"
+          className="text-2xl sm:text-3xl md:text-4xl font-black text-center tracking-wider"
           style={{ color: 'var(--color-abyss-text-titles-principal)' }}
         >
           Grupos de Traducción
@@ -44,12 +44,12 @@ export default function Groups() {
             No hay grupos disponibles por el momento.
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-8 px-2 md:px-0">
             {grupos.map(grupo => (
               <div 
                 key={grupo.id} 
                 onClick={() => navigate(`/grupos/${grupo.id}`)}
-                className="relative border-2 border-abyss-border-card-gp rounded-2xl overflow-hidden shadow-xl hover:-translate-y-2 transition-transform duration-300 h-[300px] group cursor-pointer"
+                className="relative border-2 border-abyss-border-card-gp rounded-2xl overflow-hidden shadow-xl hover:-translate-y-2 transition-transform duration-300 h-[250px] md:h-[300px] group cursor-pointer"
               >
                 {grupo.portada ? (
                   <div 
@@ -58,17 +58,17 @@ export default function Groups() {
                   />
                 ) : (
                   <div className="absolute inset-0 w-full h-full bg-abyss-bg-card-gp flex items-center justify-center transition-transform duration-500 group-hover:scale-105">
-                    <span className="text-abyss-text-card-gp font-medium opacity-70">Sin Portada</span>
+                    <span className="text-abyss-text-card-gp font-medium opacity-70 text-sm md:text-base">Sin Portada</span>
                   </div>
                 )}
                 
                 <div className="absolute inset-0 bg-gradient-to-t from-[#012533]/90 via-transparent to-transparent opacity-60 group-hover:opacity-80 transition-opacity duration-300" />
                 
-                <div className="absolute bottom-0 left-0 w-full h-[85px] py-3 px-5 bg-abyss-bg-text-card-gp/65 backdrop-blur-sm flex flex-col justify-center z-10 border-t border-abyss-border-card-gp/30">
-                  <h3 className="text-lg font-bold mb-1 text-abyss-text-card-gp truncate drop-shadow-md">
+                <div className="absolute bottom-0 left-0 w-full h-[75px] md:h-[85px] py-2 px-3 md:py-3 md:px-5 bg-abyss-bg-text-card-gp/65 backdrop-blur-sm flex flex-col justify-center z-10 border-t border-abyss-border-card-gp/30">
+                  <h3 className="text-base md:text-lg font-bold mb-0.5 md:mb-1 text-abyss-text-card-gp truncate drop-shadow-md">
                     {grupo.nombre}
                   </h3>
-                  <p className="text-abyss-text-card-gp text-sm font-medium line-clamp-2 truncate drop-shadow-md">
+                  <p className="text-abyss-text-card-gp text-xs md:text-sm font-medium line-clamp-2 truncate drop-shadow-md">
                     {grupo.descripcion}
                   </p>
                 </div>
