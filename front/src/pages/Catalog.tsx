@@ -167,7 +167,7 @@ export default function Catalog() {
               <div className="p-4 md:p-6 bg-abyss-bg-filter-selecs flex flex-wrap justify-start items-start gap-6 md:gap-10">
                 
                 {/* Tipo */}
-                <div className="min-w-[180px] flex-1">
+                <div className="min-w-[180px] w-fit">
                   <h3 className="text-abyss-title-option bg-abyss-bg-title-option px-4 py-1.5 mb-4 rounded font-bold uppercase tracking-wider text-sm shadow-sm inline-block">Tipo</h3>
                   <div className="flex flex-col space-y-3">
                     {tipos.map(tipo => (
@@ -185,7 +185,7 @@ export default function Catalog() {
                 </div>
 
                 {/* Demografía */}
-                <div className="flex-1 min-w-[200px] max-w-[320px]">
+                <div className="min-w-[180px] w-fit">
                   <h3 className="text-abyss-title-option bg-abyss-bg-title-option px-4 py-1.5 mb-4 rounded font-bold uppercase tracking-wider text-sm shadow-sm inline-block">Demografía</h3>
                   <div className="flex flex-col space-y-3">
                     {demografias.map(demo => (
@@ -203,7 +203,7 @@ export default function Catalog() {
                 </div>
 
                 {/* Estado */}
-                <div className="flex-1 min-w-[200px] max-w-[320px]">
+                <div className="min-w-[180px] w-fit">
                   <h3 className="text-abyss-title-option bg-abyss-bg-title-option px-4 py-1.5 mb-4 rounded font-bold uppercase tracking-wider text-sm shadow-sm inline-block">Estado</h3>
                   <div className="flex flex-col space-y-3">
                     {['En emisión', 'Finalizado', 'Pausado'].map((estadoString, index) => {
