@@ -86,10 +86,11 @@ public class CapituloService {
      */
     @Transactional(readOnly = true)
     public CapituloResponseDTO obtenerCapituloPorObraYNumero(String nombreObra, double numero) {
+        String tituloNorm = nombreObra.replace("-", " ");
         Capitulo capitulo = capituloRepository
-                .findByObraTituloAndNumero(nombreObra, numero)
+                .findByObraTituloAndNumero(tituloNorm, numero)
                 .orElseThrow(() -> new EntityNotFoundException(
-                        String.format("Capítulo %.0f de la obra '%s' no encontrado", numero, nombreObra)
+                        String.format("Capítulo %.0f de la obra '%s' no encontrado", numero, tituloNorm)
                 ));
 
         return mapToDTO(capitulo);
