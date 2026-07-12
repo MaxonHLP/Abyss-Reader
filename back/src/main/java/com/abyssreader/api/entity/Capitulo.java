@@ -37,4 +37,7 @@ public class Capitulo extends BaseEntity {
     @OrderColumn(name = "orden_pagina")
     @Column(name = "url", nullable = false, length = 1024)
     private List<String> paginasUrls = new ArrayList<>();
+
+    @Column(nullable = false)
+    private Boolean dataCore = false;
 }

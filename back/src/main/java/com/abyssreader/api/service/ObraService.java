@@ -12,6 +12,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
+import org.springframework.http.HttpStatus;
 
 import java.util.List;
 import java.util.Set;
@@ -99,6 +101,12 @@ public class ObraService {
         Obra obra = obraRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Obra no encontrada con id: " + id));
 
+        String authMail = SecurityContextHolder.getContext().getAuthentication().getName();
+        Usuario usuario = usuarioRepository.findByMail(authMail).orElse(null);
+        if (usuario != null && Boolean.TRUE.equals(usuario.getEsDemo()) && Boolean.TRUE.equals(obra.getDataCore())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "DEMO_RESTRICTION");
+        }
+
         obra.setTitulo(request.getTitulo());
         obra.setDescripcion(request.getDescripcion());
         obra.setEstado(request.getEstado());
@@ -164,6 +172,10 @@ public class ObraService {
 
         Obra obra = obraRepository.findById(obraId)
                 .orElseThrow(() -> new EntityNotFoundException("Obra no encontrada con id: " + obraId));
+
+        if (Boolean.TRUE.equals(usuario.getEsDemo()) && Boolean.TRUE.equals(obra.getDataCore())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "DEMO_RESTRICTION");
+        }
 
         // Paso 2 — Purgar GCS: páginas de todos los capítulos
         for (Capitulo capitulo : obra.getCapitulos()) {

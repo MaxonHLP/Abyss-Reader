@@ -76,4 +76,7 @@ public class Obra extends BaseEntity {
     @OneToMany(mappedBy = "obra", cascade = CascadeType.REMOVE, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<Capitulo> capitulos = new ArrayList<>();
 
+    @Column(nullable = false)
+    private Boolean dataCore = false;
+
 }

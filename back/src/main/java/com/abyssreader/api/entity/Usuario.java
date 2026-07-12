@@ -40,4 +40,7 @@ public class Usuario extends BaseEntity {
 
     @Column(nullable = false)
     private Boolean activo = true;
+
+    @Column(nullable = false)
+    private Boolean esDemo = false;
 }

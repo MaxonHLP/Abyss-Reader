@@ -22,6 +22,8 @@ import com.abyssreader.api.repository.CapituloLeidoRepository;
 import com.abyssreader.api.repository.UsuarioRepository;
 import com.abyssreader.api.entity.CapituloLeido;
 import com.abyssreader.api.entity.CapituloLeidoId;
+import org.springframework.web.server.ResponseStatusException;
+import org.springframework.http.HttpStatus;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -141,6 +143,12 @@ public class CapituloService {
                 .orElseThrow(() -> new EntityNotFoundException(
                         "Capítulo con ID " + id + " no encontrado"));
 
+        String authMail = SecurityContextHolder.getContext().getAuthentication().getName();
+        java.util.Optional<com.abyssreader.api.entity.Usuario> userOpt = usuarioRepository.findByMail(authMail);
+        if (userOpt.isPresent() && Boolean.TRUE.equals(userOpt.get().getEsDemo()) && Boolean.TRUE.equals(capitulo.getDataCore())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "DEMO_RESTRICTION");
+        }
+
         // 2. Actualizar número si viene en el DTO
         if (dto.getNumero() != null) {
             capitulo.setNumero(dto.getNumero());
@@ -181,6 +189,12 @@ public class CapituloService {
         Capitulo capitulo = capituloRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(
                         "Capítulo con ID " + id + " no encontrado"));
+
+        String authMail = SecurityContextHolder.getContext().getAuthentication().getName();
+        java.util.Optional<com.abyssreader.api.entity.Usuario> userOpt = usuarioRepository.findByMail(authMail);
+        if (userOpt.isPresent() && Boolean.TRUE.equals(userOpt.get().getEsDemo()) && Boolean.TRUE.equals(capitulo.getDataCore())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "DEMO_RESTRICTION");
+        }
 
         // Paso 1 — Purgar GCS
         for (String url : capitulo.getPaginasUrls()) {

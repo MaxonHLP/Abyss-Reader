@@ -29,6 +29,18 @@ api.interceptors.response.use(
         window.location.href = '/login?session_expired=true';
       }
     }
+
+    // Interceptar error de protección Demo
+    if (
+      error.response &&
+      error.response.status === 403 &&
+      (error.response.data === 'DEMO_RESTRICTION' || error.response.data?.message === 'DEMO_RESTRICTION')
+    ) {
+      window.dispatchEvent(new CustomEvent('demo:restriction'));
+      // Retornar un error modificado para que el catch del componente pueda decidir si mostrar algo más
+      return Promise.reject(new Error('Modo Demostración activo. Acción bloqueada.'));
+    }
+
     return Promise.reject(error);
   }
 );
