@@ -3,9 +3,9 @@ import type { Comentario } from '../../types/comentarios';
 import { useAuthStore } from '../../store/useAuthStore';
 import api from '../../services/api';
 
-interface CommentItemProps {
+interface ChapterCommentItemProps {
   comentario: Comentario;
-  obraId: number;
+  capituloId: number;
   /** Callback para refrescar la lista desde el padre tras una acción */
   onRefresh: () => void;
   /** Nivel de anidamiento (0 = raíz, 1 = primer nivel de respuestas, etc.) */
@@ -13,15 +13,10 @@ interface CommentItemProps {
 }
 
 /**
- * Componente recursivo para renderizar un comentario y sus respuestas anidadas.
- *
- * RECURSIVIDAD:
- * Si el comentario tiene respuestas, al final del JSX se hace .map()
- * sobre ellas y se renderiza <CommentItem /> dentro de sí mismo,
- * envuelto en un contenedor con sangría y borde izquierdo para el
- * efecto visual de "hilo/rama".
+ * Componente recursivo para renderizar un comentario de capítulo y sus respuestas anidadas.
+ * Conectado a /api/capitulos/{capituloId}/comentarios y /api/comentarios/capitulo/{id}
  */
-export default function CommentItem({ comentario, obraId, onRefresh, nivel = 0 }: CommentItemProps) {
+export default function ChapterCommentItem({ comentario, capituloId, onRefresh, nivel = 0 }: ChapterCommentItemProps) {
   const { user } = useAuthStore();
   const [showReply, setShowReply] = useState(false);
   const [replyText, setReplyText] = useState('');
@@ -47,7 +42,7 @@ export default function CommentItem({ comentario, obraId, onRefresh, nivel = 0 }
     setEnviando(true);
     setError(null);
     try {
-      await api.post(`/obras/${obraId}/comentarios`, {
+      await api.post(`/capitulos/${capituloId}/comentarios`, {
         contenido: replyText.trim(),
         padreId: comentario.id,
       });
@@ -65,7 +60,7 @@ export default function CommentItem({ comentario, obraId, onRefresh, nivel = 0 }
     if (!window.confirm('¿Eliminar este comentario?')) return;
     setEliminando(true);
     try {
-      await api.delete(`/comentarios/obra/${comentario.id}`);
+      await api.delete(`/comentarios/capitulo/${comentario.id}`);
       onRefresh();
     } catch {
       setError('No se pudo eliminar el comentario.');
@@ -150,7 +145,7 @@ export default function CommentItem({ comentario, obraId, onRefresh, nivel = 0 }
           </p>
         )}
 
-        {/* Botón Responder (solo si autenticado, no eliminado y nivel < 4 para no profundizar infinito) */}
+        {/* Botón Responder (solo si autenticado, no eliminado y nivel < 4) */}
         {user && !comentario.eliminado && nivel < 4 && (
           <div className="flex gap-2 items-center">
             <button
@@ -203,10 +198,10 @@ export default function CommentItem({ comentario, obraId, onRefresh, nivel = 0 }
           style={{ borderLeft: '2px solid var(--color-abyss-border-seccion-comentarios)' }}
         >
           {comentario.respuestas.map((respuesta) => (
-            <CommentItem
+            <ChapterCommentItem
               key={respuesta.id}
               comentario={respuesta}
-              obraId={obraId}
+              capituloId={capituloId}
               onRefresh={onRefresh}
               nivel={nivel + 1}
             />

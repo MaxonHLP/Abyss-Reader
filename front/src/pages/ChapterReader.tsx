@@ -7,6 +7,7 @@ import {
 import { useAuthStore } from '../store/useAuthStore';
 import api from '../services/api';
 import Navbar from '../components/Navbar';
+import ChapterCommentSection from '../components/comments/ChapterCommentSection';
 
 // ────────────────────────────────────────────────────────────
 // Icono de flecha izquierda
@@ -353,6 +354,12 @@ export default function ChapterReader() {
         onNext={handleNext}
         onScrollTop={handleScrollTop}
       />
+
+      {/* ── Sección de comentarios del capítulo ── */}
+      <ChapterCommentSection capituloId={capitulo.id} />
+
+      {/* Espaciado final */}
+      <div className="h-16" />
     </div>
     </>
   );
