@@ -7,7 +7,7 @@ import com.abyssreader.api.repository.*;
 import com.abyssreader.api.entity.Capitulo;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.crypto.password.PasswordEncoder;
+
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -41,7 +41,7 @@ public class ObraService {
     private final HistorialRepository historialRepository;
     private final ObraLikeRepository obraLikeRepository;
     private final UsuarioRepository usuarioRepository;
-    private final PasswordEncoder passwordEncoder;
+
 
     @Transactional
     public ObraResponseDTO createObra(ObraRequestDTO request, MultipartFile portada) {
@@ -88,6 +88,14 @@ public class ObraService {
                 if (!allSameGroup) {
                     throw new RuntimeException("Todo el staff asignado debe pertenecer al grupo de la obra.");
                 }
+
+                Usuario creadorGrupo = usuarioRepository.findById(grupo.getCreadorId()).orElse(null);
+                if (creadorGrupo != null && Boolean.TRUE.equals(creadorGrupo.getEsDemo())) {
+                    if (!usuario.getId().equals(creadorGrupo.getId())) {
+                        throw new DemoIsolationException();
+                    }
+                }
+                
                 obra.setStaff(staff);
             }
         } catch (jakarta.persistence.EntityNotFoundException e) {
@@ -148,6 +156,14 @@ public class ObraService {
                 if (!allSameGroup) {
                     throw new RuntimeException("Todo el staff asignado debe pertenecer al grupo de la obra.");
                 }
+
+                Usuario creadorGrupo = usuarioRepository.findById(obra.getGrupo().getCreadorId()).orElse(null);
+                if (creadorGrupo != null && Boolean.TRUE.equals(creadorGrupo.getEsDemo())) {
+                    if (usuario == null || !usuario.getId().equals(creadorGrupo.getId())) {
+                        throw new DemoIsolationException();
+                    }
+                }
+
                 obra.setStaff(staff);
             }
         } catch (jakarta.persistence.EntityNotFoundException e) {
@@ -183,14 +199,11 @@ public class ObraService {
      * 5. Destruir la raíz (obraRepository.delete): Hibernate en cascada borra capítulos y likes.
      */
     @Transactional
-    public void eliminarObra(Long obraId, String password) {
+    public void eliminarObra(Long obraId) {
         String authMail = SecurityContextHolder.getContext().getAuthentication().getName();
         Usuario usuario = usuarioRepository.findByMail(authMail)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
-        if (!passwordEncoder.matches(password, usuario.getContrasena())) {
-            throw new RuntimeException("Contraseña incorrecta");
-        }
 
         Obra obra = obraRepository.findById(obraId)
                 .orElseThrow(() -> new EntityNotFoundException("Obra no encontrada con id: " + obraId));

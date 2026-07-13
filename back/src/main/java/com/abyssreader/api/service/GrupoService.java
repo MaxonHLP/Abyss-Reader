@@ -13,7 +13,7 @@ import com.abyssreader.api.entity.Usuario;
 import com.abyssreader.api.util.Rol;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.crypto.password.PasswordEncoder;
+
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -153,7 +153,7 @@ public class GrupoService {
     }
 
     @Transactional
-    public void deleteGrupo(Long id, String masterPassword) {
+    public void deleteGrupo(Long id) {
         Grupo grupo = grupoRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Grupo no encontrado con id: " + id));
         
@@ -172,10 +172,6 @@ public class GrupoService {
             if (!usuario.getId().equals(grupo.getCreadorId())) {
                 throw new DemoIsolationException();
             }
-        }
-
-        if (!passwordEncoder.matches(masterPassword, usuario.getContrasena())) {
-            throw new RuntimeException("Contraseña de MASTER incorrecta");
         }
 
         // Purgar de GCS la portada del grupo

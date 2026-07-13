@@ -3,7 +3,7 @@ package com.abyssreader.api.controller;
 import com.abyssreader.api.dto.obra.ObraEditRequestDTO;
 import com.abyssreader.api.dto.obra.ObraRequestDTO;
 import com.abyssreader.api.dto.obra.ObraResponseDTO;
-import com.abyssreader.api.dto.auth.PasswordConfirmationDTO;
+
 import com.abyssreader.api.service.ObraInteraccionService;
 import com.abyssreader.api.service.ObraService;
 import jakarta.validation.Valid;
@@ -97,9 +97,8 @@ public class ObraController {
     @DeleteMapping("/api/obras/{id}")
     @PreAuthorize("hasRole('MASTER')")
     public ResponseEntity<Void> eliminarObra(
-            @PathVariable Long id,
-            @jakarta.validation.Valid @RequestBody PasswordConfirmationDTO request) {
-        obraService.eliminarObra(id, request.getPassword());
+            @PathVariable Long id) {
+        obraService.eliminarObra(id);
         return ResponseEntity.noContent().build();
     }
 }

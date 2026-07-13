@@ -10,10 +10,7 @@ interface EditProfileModalProps {
   onSuccess: (nuevaDescripcion: string | null, nuevoNombre: string) => void;
 }
 
-interface ConfirmPopupState {
-  visible: boolean;
-  tipo: 'mail' | 'password' | null;
-}
+
 
 export default function EditProfileModal({ isOpen, onClose, descripcionActual, onSuccess }: EditProfileModalProps) {
   const { user, login, token } = useAuthStore();
@@ -23,10 +20,8 @@ export default function EditProfileModal({ isOpen, onClose, descripcionActual, o
   const [descripcion, setDescripcion] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [contrasenaActual, setContrasenaActual] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
-  const [showActual, setShowActual] = useState(false);
   const [showSensibleData, setShowSensibleData] = useState(false);
 
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
@@ -37,8 +32,6 @@ export default function EditProfileModal({ isOpen, onClose, descripcionActual, o
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Popup de confirmación para cambios sensibles
-  const [confirmPopup, setConfirmPopup] = useState<ConfirmPopupState>({ visible: false, tipo: null });
   const [pendingSubmit, setPendingSubmit] = useState(false);
 
   // Inicializar campos al abrir
@@ -49,11 +42,9 @@ export default function EditProfileModal({ isOpen, onClose, descripcionActual, o
     setDescripcion(descripcionActual ?? '');
     setPassword('');
     setConfirmPassword('');
-    setContrasenaActual('');
     setAvatarFile(null);
     setAvatarPreview(user?.fotoPerfil ?? null);
     setError(null);
-    setConfirmPopup({ visible: false, tipo: null });
     setPendingSubmit(false);
     setShowSensibleData(false);
   }, [isOpen]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -80,7 +71,6 @@ export default function EditProfileModal({ isOpen, onClose, descripcionActual, o
   // ── Validar y enviar ─────────────────────────────────────────
   const handleSaveClick = () => {
     setError(null);
-    const cambiaMail = mail.trim() !== '' && mail.trim() !== user?.mail;
     const cambiaPass = password.trim() !== '';
 
     if (cambiaPass && password !== confirmPassword) {
@@ -88,26 +78,6 @@ export default function EditProfileModal({ isOpen, onClose, descripcionActual, o
       return;
     }
 
-    if (cambiaMail && cambiaPass) {
-      setConfirmPopup({ visible: true, tipo: 'password' }); // pide la actual una sola vez
-      setPendingSubmit(true);
-      return;
-    }
-    if (cambiaMail) {
-      setConfirmPopup({ visible: true, tipo: 'mail' });
-      setPendingSubmit(true);
-      return;
-    }
-    if (cambiaPass) {
-      setConfirmPopup({ visible: true, tipo: 'password' });
-      setPendingSubmit(true);
-      return;
-    }
-    submitForm();
-  };
-
-  const handleConfirmPopupAccept = () => {
-    setConfirmPopup({ visible: false, tipo: null });
     submitForm();
   };
 
@@ -121,10 +91,6 @@ export default function EditProfileModal({ isOpen, onClose, descripcionActual, o
       if (descripcion.trim() !== (descripcionActual ?? '')) requestData.descripcion = descripcion.trim();
       if (password.trim()) {
         requestData.contrasena = password.trim();
-        requestData.contrasenaActual = contrasenaActual.trim();
-      }
-      if (mail.trim() !== user?.mail) {
-        requestData.contrasenaActual = contrasenaActual.trim();
       }
 
       const formData = new FormData();
@@ -171,55 +137,7 @@ export default function EditProfileModal({ isOpen, onClose, descripcionActual, o
       style={{ background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(6px)' }}
       onClick={onClose}
     >
-      {/* ── Pop-up de confirmación ── */}
-      {confirmPopup.visible && (
-        <div
-          className="fixed inset-0 z-[60] flex items-center justify-center"
-          style={{ background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)' }}
-          onClick={e => e.stopPropagation()}
-        >
-          <div
-            className="w-full max-w-sm rounded-2xl p-6 flex flex-col gap-4 shadow-2xl"
-            style={{ background: '#161b22', border: '1px solid rgba(0,235,219,0.2)' }}
-          >
-            <h3 className="text-base font-bold text-white">Confirmar cambio sensible</h3>
-            <p className="text-sm text-white/60">
-              {confirmPopup.tipo === 'mail'
-                ? 'Estás por cambiar tu correo electrónico. Ingresá tu contraseña actual para confirmar.'
-                : 'Estás por cambiar tu contraseña. Ingresá tu contraseña actual para confirmar.'}
-            </p>
-            <div className="relative">
-              <input
-                type={showActual ? 'text' : 'password'}
-                value={contrasenaActual}
-                onChange={e => setContrasenaActual(e.target.value)}
-                placeholder="Contraseña actual"
-                className={inputClass}
-                autoFocus
-              />
-              <button type="button" onClick={() => setShowActual(v => !v)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/60 transition-colors">
-                <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                </svg>
-              </button>
-            </div>
-            <div className="flex gap-3">
-              <button onClick={() => { setConfirmPopup({ visible: false, tipo: null }); setPendingSubmit(false); }}
-                className="flex-1 py-2.5 rounded-xl text-sm text-white/50 border border-white/10 hover:bg-white/5 transition-all">
-                Cancelar
-              </button>
-              <button onClick={handleConfirmPopupAccept}
-                disabled={!contrasenaActual.trim()}
-                className="flex-1 py-2.5 rounded-xl text-sm font-bold transition-all disabled:opacity-40"
-                style={{ background: 'linear-gradient(135deg,#00EBDB,#0099cc)', color: '#0d1117' }}>
-                Confirmar
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+
 
       {/* ── Panel principal ── */}
       <div
@@ -310,7 +228,6 @@ export default function EditProfileModal({ isOpen, onClose, descripcionActual, o
               <div className="flex flex-col">
                 <label className={labelClass}>Correo electrónico</label>
                 <input type="email" value={mail} onChange={e => setMail(e.target.value)} placeholder="tu@correo.com" className={inputClass} disabled={isLoading} />
-                {mail !== user?.mail && <p className="text-xs text-amber-400/80 mt-1">⚠ Cambiar el correo requerirá confirmación de contraseña.</p>}
               </div>
 
               {/* Nueva contraseña */}

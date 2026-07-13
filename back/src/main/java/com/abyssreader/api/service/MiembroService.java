@@ -61,6 +61,14 @@ public class MiembroService {
         // Herencia de Demo e Isolation check
         String creadorMail = SecurityContextHolder.getContext().getAuthentication().getName();
         Usuario creador = usuarioRepository.findByMail(creadorMail).orElse(null);
+
+        Usuario creadorGrupo = usuarioRepository.findById(grupo.getCreadorId()).orElse(null);
+        if (creadorGrupo != null && Boolean.TRUE.equals(creadorGrupo.getEsDemo())) {
+            if (creador == null || !creador.getId().equals(creadorGrupo.getId())) {
+                throw new DemoIsolationException();
+            }
+        }
+
         if (creador != null) {
             if (Boolean.TRUE.equals(creador.getEsDemo())) {
                 if (creador.getRol() == Rol.MASTER) {

@@ -24,11 +24,9 @@ export const editarGrupo = async (id: string | number, formData: FormData) => {
   return response.data;
 };
 
-// Eliminar grupo (requiere contraseña de MASTER)
-export const eliminarGrupo = async (id: string | number, password: string) => {
-  const response = await api.delete(`/grupos/${id}`, {
-    data: { password }
-  });
+// Eliminar grupo (sin contraseña)
+export const eliminarGrupo = async (id: string | number) => {
+  const response = await api.delete(`/grupos/${id}`);
   return response.data;
 };
 

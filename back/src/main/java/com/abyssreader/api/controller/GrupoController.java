@@ -3,7 +3,7 @@ package com.abyssreader.api.controller;
 import com.abyssreader.api.dto.grupo.GrupoRequestDTO;
 import com.abyssreader.api.dto.grupo.GrupoResponseDTO;
 import com.abyssreader.api.dto.grupo.GrupoDetalleDTO;
-import com.abyssreader.api.dto.auth.PasswordConfirmationDTO;
+
 import com.abyssreader.api.service.GrupoService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -66,8 +66,8 @@ public class GrupoController {
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('MASTER')")
-    public ResponseEntity<Void> deleteGrupo(@PathVariable Long id, @Valid @RequestBody PasswordConfirmationDTO request) {
-        grupoService.deleteGrupo(id, request.getPassword());
+    public ResponseEntity<Void> deleteGrupo(@PathVariable Long id) {
+        grupoService.deleteGrupo(id);
         return ResponseEntity.noContent().build();
     }
 }

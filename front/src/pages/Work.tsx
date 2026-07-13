@@ -55,8 +55,6 @@ export default function Work() {
   const [modalEliminarCapituloAbierto, setModalEliminarCapituloAbierto] = useState(false);
   // Estados para eliminar obra
   const [showDeleteObraConfirm, setShowDeleteObraConfirm] = useState(false);
-  const [deleteObraStep, setDeleteObraStep] = useState<'confirm' | 'password'>('confirm');
-  const [deleteObraPassword, setDeleteObraPassword] = useState('');
   const [isDeletingObra, setIsDeletingObra] = useState(false);
   const [deleteObraError, setDeleteObraError] = useState<string | null>(null);
   const [estadoGuardado, setEstadoGuardado] = useState<EstadoGuardado | ''>('');
@@ -167,11 +165,11 @@ export default function Work() {
   };
 
   const handleEliminarObra = async () => {
-    if (!obra || !deleteObraPassword.trim()) return;
+    if (!obra) return;
     setIsDeletingObra(true);
     setDeleteObraError(null);
     try {
-      await api.delete(`/obras/${obra.id}`, { data: { password: deleteObraPassword } });
+      await api.delete(`/obras/${obra.id}`);
       navigate(-1);
     } catch (err: unknown) {
       const e = err as { response?: { data?: { message?: string, error?: string } } };
@@ -183,7 +181,7 @@ export default function Work() {
         useToastStore.getState().showToast('ISOLATION', "No tienes poder sobre las obras de otro creador.");
         resetDeleteObraModal();
       } else {
-        setDeleteObraError(e.response?.data?.message || 'Contraseña incorrecta o error de servidor.');
+        setDeleteObraError(e.response?.data?.message || 'Error de servidor.');
       }
     } finally {
       setIsDeletingObra(false);
@@ -192,8 +190,6 @@ export default function Work() {
 
   const resetDeleteObraModal = () => {
     setShowDeleteObraConfirm(false);
-    setDeleteObraStep('confirm');
-    setDeleteObraPassword('');
     setDeleteObraError(null);
   };
 
@@ -280,53 +276,23 @@ export default function Work() {
                 </svg>
               </div>
               <h2 className="text-xl font-bold text-red-300 uppercase tracking-wide">
-                {deleteObraStep === 'confirm' ? 'Eliminar Obra' : 'Confirmar identidad'}
+                Eliminar Obra
               </h2>
             </div>
 
-            {deleteObraStep === 'confirm' ? (
-              <>
-                <p className="text-abyss-text-titles-form-crear/80">
-                  ¿Estás seguro que deseas eliminar <span className="font-bold text-white">"{obra.titulo}"</span>?
-                  Esta acción es permanente e irreversible. Se eliminarán todos los capítulos y páginas asociados.
-                </p>
-                <div className="flex gap-3">
-                  <button onClick={resetDeleteObraModal} className="flex-1 bg-abyss-bg-input-form-crear text-abyss-text-titles-form-crear border border-abyss-border-input-form-crear rounded-lg py-2.5 font-semibold hover:brightness-110 transition">
-                    Cancelar
-                  </button>
-                  <button onClick={() => setDeleteObraStep('password')} className="flex-1 bg-red-700 hover:bg-red-600 text-white font-bold rounded-lg py-2.5 transition">
-                    Sí, eliminar
-                  </button>
-                </div>
-              </>
-            ) : (
-              <>
-                <p className="text-abyss-text-titles-form-crear/70 text-sm">
-                  Ingresá tu contraseña para confirmar la eliminación definitiva.
-                </p>
-                <input
-                  type="password"
-                  value={deleteObraPassword}
-                  onChange={e => setDeleteObraPassword(e.target.value)}
-                  onKeyDown={e => e.key === 'Enter' && !isDeletingObra && deleteObraPassword.trim() && handleEliminarObra()}
-                  placeholder="Contraseña"
-                  className="bg-abyss-bg-input-form-crear text-abyss-text-input-form-crear border border-abyss-border-input-form-crear rounded-lg px-4 py-3 outline-none focus:ring-2 focus:ring-red-500/50 transition-shadow"
-                />
-                {deleteObraError && <p className="text-red-400 text-sm font-bold">{deleteObraError}</p>}
-                <div className="flex gap-3">
-                  <button onClick={() => setDeleteObraStep('confirm')} disabled={isDeletingObra} className="flex-1 bg-abyss-bg-input-form-crear text-abyss-text-titles-form-crear border border-abyss-border-input-form-crear rounded-lg py-2.5 font-semibold hover:brightness-110 transition disabled:opacity-50">
-                    Volver
-                  </button>
-                  <button
-                    onClick={handleEliminarObra}
-                    disabled={!deleteObraPassword.trim() || isDeletingObra}
-                    className="flex-1 bg-red-700 hover:bg-red-600 text-white font-bold rounded-lg py-2.5 transition disabled:opacity-40 disabled:cursor-not-allowed"
-                  >
-                    {isDeletingObra ? 'Eliminando...' : 'Confirmar'}
-                  </button>
-                </div>
-              </>
-            )}
+            <p className="text-abyss-text-titles-form-crear/80">
+              ¿Estás seguro que deseas eliminar <span className="font-bold text-white">"{obra.titulo}"</span>?
+              Esta acción es permanente e irreversible. Se eliminarán todos los capítulos y páginas asociados.
+            </p>
+            {deleteObraError && <p className="text-red-400 text-sm font-bold">{deleteObraError}</p>}
+            <div className="flex gap-3">
+              <button onClick={resetDeleteObraModal} className="flex-1 bg-abyss-bg-input-form-crear text-abyss-text-titles-form-crear border border-abyss-border-input-form-crear rounded-lg py-2.5 font-semibold hover:brightness-110 transition">
+                Cancelar
+              </button>
+              <button onClick={handleEliminarObra} disabled={isDeletingObra} className="flex-1 bg-red-700 hover:bg-red-600 text-white font-bold rounded-lg py-2.5 transition">
+                {isDeletingObra ? 'Eliminando...' : 'Sí, eliminar'}
+              </button>
+            </div>
           </div>
         </div>
       )}

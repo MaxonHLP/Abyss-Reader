@@ -45,7 +45,6 @@ const GroupDetails = () => {
   const [isMemberModalOpen, setIsMemberModalOpen] = useState(false);
   const [isEditGroupModalOpen, setIsEditGroupModalOpen] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [masterPassword, setMasterPassword] = useState('');
   const [isDeleting, setIsDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [memberToDelete, setMemberToDelete] = useState<Miembro | null>(null);
@@ -73,11 +72,11 @@ const GroupDetails = () => {
   }, [fetchGroup]);
 
   const handleDeleteGrupo = async () => {
-    if (!id || !masterPassword.trim()) return;
+    if (!id) return;
     setIsDeleting(true);
     setDeleteError(null);
     try {
-      await eliminarGrupo(id, masterPassword);
+      await eliminarGrupo(id);
       navigate('/master');
     } catch (error: unknown) {
       console.error("Error al eliminar grupo:", error);
@@ -199,24 +198,17 @@ const GroupDetails = () => {
         {showDeleteConfirm && (
           <div className="bg-red-900/20 border-2 border-red-500/50 rounded-xl p-4 mb-6 flex flex-col md:flex-row items-center gap-4 animate-fade-in">
             <div className="flex-1 text-red-100 font-bold">
-              ¿Estás seguro que deseas eliminar el grupo "{grupo.nombre}"? Ingresa tu contraseña maestra:
+              ¿Estás seguro que deseas eliminar el grupo "{grupo.nombre}"?
             </div>
-            <input 
-              type="password" 
-              value={masterPassword}
-              onChange={(e) => setMasterPassword(e.target.value)}
-              placeholder="Contraseña MASTER" 
-              className="bg-black/50 text-white border border-red-500/50 rounded-lg p-2 outline-none focus:ring-2 focus:ring-red-500"
-            />
             <button 
               onClick={handleDeleteGrupo}
-              disabled={isDeleting || !masterPassword.trim()}
+              disabled={isDeleting}
               className="bg-red-600 hover:bg-red-500 text-white font-bold py-2 px-6 rounded-lg transition-colors disabled:opacity-50"
             >
-              {isDeleting ? 'Eliminando...' : 'Confirmar'}
+              {isDeleting ? 'Eliminando...' : 'Sí, eliminar'}
             </button>
             <button 
-              onClick={() => { setShowDeleteConfirm(false); setMasterPassword(''); setDeleteError(null); }}
+              onClick={() => { setShowDeleteConfirm(false); setDeleteError(null); }}
               disabled={isDeleting}
               className="bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 px-6 rounded-lg transition-colors"
             >

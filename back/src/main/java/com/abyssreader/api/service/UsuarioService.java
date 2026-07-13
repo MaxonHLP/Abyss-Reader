@@ -50,18 +50,9 @@ public class UsuarioService {
         Usuario usuario = usuarioRepository.findByMail(mail)
                 .orElseThrow(() -> new EntityNotFoundException("Usuario no encontrado"));
 
-        boolean cambioSensible = (request.getMail() != null && !request.getMail().isBlank() && !request.getMail().equals(mail))
-                || (request.getContrasena() != null && !request.getContrasena().isBlank());
 
-        // Validación de contraseña actual para cambios sensibles
-        if (cambioSensible) {
-            if (request.getContrasenaActual() == null || request.getContrasenaActual().isBlank()) {
-                throw new RuntimeException("Debés confirmar tu contraseña actual para cambiar el correo o la contraseña.");
-            }
-            if (!passwordEncoder.matches(request.getContrasenaActual(), usuario.getContrasena())) {
-                throw new RuntimeException("La contraseña actual ingresada es incorrecta.");
-            }
-        }
+
+
 
         // Actualizar nombre
         if (request.getNombre() != null && !request.getNombre().isBlank()) {
