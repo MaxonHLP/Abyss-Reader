@@ -180,3 +180,18 @@
 
 
 }
+
+@layer base {
+  /* Estilizar las opciones de los select para que resalten y contrasten con el fondo del modal */
+  select option {
+    background-color: var(--color-abyss-bg-nav, #0A5571);
+    color: var(--color-abyss-navbar-text, #00E6D7);
+    font-weight: 500;
+    padding: 8px;
+  }
+  
+  /* En Firefox y Webkit, el select puede tener un borde/outline raro, aseguramos que herede bordes suaves */
+  select {
+    cursor: pointer;
+  }
+}

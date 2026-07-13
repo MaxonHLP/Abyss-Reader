@@ -199,6 +199,10 @@ export default function ChapterReader() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [obraNombre, numero]);
+
+  useEffect(() => {
     if (!obraNombre || !numero) return;
 
     let cancelled = false;

@@ -232,7 +232,7 @@ public class DemoService {
         miembroRepository.save(miembroExtra);
 
         // 4. Crear una Obra demo y asignarla al grupo
-        crearObraDemo(grupoSaved);
+        crearObraDemo(grupoSaved, adminSaved.getId());
 
         // 5. Generar tokens
         String tokenActivo = jwtTokenProvider.generarTokenDemo(
@@ -253,7 +253,7 @@ public class DemoService {
      * Crea una obra demo asignada al grupo del MIEMBRO_ADMIN demo.
      * Toma el primer Tipo y Demografía disponibles en la BD.
      */
-    private void crearObraDemo(Grupo grupo) {
+    private void crearObraDemo(Grupo grupo, Long creadorId) {
         // Obtener el primer Tipo disponible
         List<Tipo> tipos = tipoRepository.findAll(PageRequest.of(0, 1)).getContent();
         List<Demografia> demografias = demografiaRepository.findAll(PageRequest.of(0, 1)).getContent();
@@ -273,6 +273,7 @@ public class DemoService {
         obra.setDataCore(false);
         obra.setVistas(0);
         obra.setLikes(0);
+        obra.setCreadorId(creadorId);
 
         obraRepository.save(obra);
         log.info("Demo Obra creada: '{}' para grupo '{}'", obra.getTitulo(), grupo.getNombre());
