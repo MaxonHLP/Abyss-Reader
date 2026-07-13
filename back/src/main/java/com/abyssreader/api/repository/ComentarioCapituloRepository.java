@@ -22,4 +22,7 @@ public interface ComentarioCapituloRepository extends JpaRepository<ComentarioCa
      */
     @Query("SELECT COUNT(c) FROM ComentarioCapitulo c WHERE c.capitulo.id = :capituloId AND c.eliminado = false")
     long countActivosByCapituloId(@Param("capituloId") Long capituloId);
+
+    /** Obtiene todos los comentarios creados por un autor específico. Usado para limpieza demo. */
+    java.util.List<ComentarioCapitulo> findByAutorId(Long autorId);
 }

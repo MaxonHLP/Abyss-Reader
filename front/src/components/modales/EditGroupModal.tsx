@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { editarGrupo } from '../../services/masterService';
+import { useToastStore } from '../../store/useToastStore';
 
 interface EditGroupModalProps {
   isOpen: boolean;
@@ -126,9 +127,20 @@ const EditGroupModal = ({ isOpen, groupId, initialName, initialDescription, init
       
       onSuccess();
       onClose();
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
-      setError(err.response?.data?.message || "Ocurrió un error al intentar editar el grupo.");
+      const axiosErr = err as { response?: { data?: { error?: string, message?: string } } };
+      const errCode = axiosErr.response?.data?.error;
+      if (errCode === 'DEMO_RESTRICTION') {
+        useToastStore.getState().showToast('DATA_CORE', "Este culto es un pilar del Abismo y no puede ser modificado.");
+        onClose();
+        return;
+      } else if (errCode === 'DEMO_ISOLATION') {
+        useToastStore.getState().showToast('ISOLATION', "No tienes poder sobre los dominios de otro Maestro.");
+        onClose();
+        return;
+      }
+      setError(axiosErr.response?.data?.message || "Ocurrió un error al intentar editar el grupo.");
     } finally {
       setIsLoading(false);
     }

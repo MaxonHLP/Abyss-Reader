@@ -10,12 +10,16 @@ interface LoginCredentials {
   password: string;
 }
 
+// Tipos de error del sistema demo para mostrar banners diferenciados
+type DemoErrorType = 'RATE_LIMIT' | 'CAPACITY_LIMIT' | null;
+
 const Login = () => {
   const [credentials, setCredentials] = useState<LoginCredentials>({
     email: '',
     password: '',
   });
   const [error, setError] = useState<string | null>(null);
+  const [demoError, setDemoError] = useState<DemoErrorType>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const navigate = useNavigate();
@@ -23,7 +27,7 @@ const Login = () => {
   const searchParams = new URLSearchParams(location.search);
   const sessionExpired = searchParams.get('session_expired') === 'true';
 
-  const { login } = useAuthStore();
+  const { login, loginWithReinit, getReinitToken, clearReinitToken } = useAuthStore();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -31,13 +35,13 @@ const Login = () => {
       ...prev,
       [name]: value
     }));
-    // Limpiamos el error visual al intentar corregir los campos
     if (error) setError(null);
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError(null);
+    setDemoError(null);
     
     if (!credentials.email.trim() || !credentials.password.trim()) {
       setError("Por favor, completa todos los campos.");
@@ -51,13 +55,9 @@ const Login = () => {
         contrasena: credentials.password 
       });
 
-      // Extraemos el token y la información del usuario de la respuesta
       const { token, ...userData } = response.data;
-      
-      // Guardamos la sesión en Zustand y LocalStorage
       login(token, userData);
       
-      // Redirigimos según el rol
       if (userData.rol === 'LECTOR') {
         navigate('/');
       } else if (userData.rol === 'MASTER') {
@@ -69,7 +69,7 @@ const Login = () => {
           navigate('/master');
         }
       } else {
-        navigate('/'); // Fallback
+        navigate('/');
       }
     } catch (err) {
       console.error("Error en login:", err);
@@ -79,14 +79,40 @@ const Login = () => {
     }
   };
 
-  const handleDemoLogin = async (email: string) => {
+  /**
+   * Maneja la creación/reanudación de una cuenta demo efímera.
+   *
+   * Flujo:
+   * 1. Verifica si existe un reinitToken guardado para el rol solicitado.
+   * 2. Si existe → envía el token como header X-Demo-Reinit-Token (reutiliza la cuenta).
+   * 3. Si no → el backend crea una cuenta nueva.
+   * 4. Maneja errores diferenciados: rate limit (429) y capacidad (503).
+   */
+  const handleDemoCreate = async (rol: string) => {
     setError(null);
+    setDemoError(null);
     setIsLoading(true);
-    setCredentials({ email, password: '123456' });
+
+    // Verificar si hay un token de reinicio para este rol
+    const reinitToken = getReinitToken(rol);
+
     try {
-      const response = await api.post('/auth/login', { mail: email, contrasena: '123456' });
-      const { token, ...userData } = response.data;
-      login(token, userData);
+      const headers: Record<string, string> = {};
+      if (reinitToken) {
+        headers['X-Demo-Reinit-Token'] = reinitToken;
+      }
+
+      const response = await api.post('/auth/demo', { rol }, { headers });
+      const { token, reinitToken: nuevoReinitToken, ...userData } = response.data;
+
+      // Si viene reinitToken en la respuesta, usar loginWithReinit
+      if (nuevoReinitToken) {
+        loginWithReinit(token, userData, nuevoReinitToken);
+      } else {
+        login(token, userData);
+      }
+
+      // Redirigir según el rol recibido
       if (userData.rol === 'LECTOR') {
         navigate('/');
       } else if (userData.rol === 'MASTER') {
@@ -100,9 +126,33 @@ const Login = () => {
       } else {
         navigate('/');
       }
-    } catch (err) {
-      console.error("Error en login demo:", err);
-      setError("Error al iniciar sesión con cuenta demo.");
+
+    } catch (err: unknown) {
+      const axiosErr = err as { response?: { status?: number; data?: { error?: string } } };
+      const status = axiosErr?.response?.status;
+      const errorCode = axiosErr?.response?.data?.error;
+
+      if (status === 429 || errorCode === 'RATE_LIMIT') {
+        // La IP superó el límite de 6 cuentas en 6 horas
+        setDemoError('RATE_LIMIT');
+        // Si el reinitToken era inválido (falló), limpiar para próximos intentos
+        if (reinitToken) clearReinitToken(rol);
+
+      } else if (status === 503 || errorCode === 'CAPACITY_LIMIT') {
+        // Se alcanzaron las 50 cuentas demo globales
+        setDemoError('CAPACITY_LIMIT');
+
+      } else {
+        // Error genérico
+        if (reinitToken) {
+          // Si había reinitToken y falló por otro motivo, limpiar y reportar
+          clearReinitToken(rol);
+          setError("La sesión demo anterior expiró. Intenta nuevamente para crear una cuenta nueva.");
+        } else {
+          setError("Error al crear la cuenta demo. Inténtalo de nuevo.");
+        }
+        console.error("Error al crear cuenta demo:", err);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -181,31 +231,53 @@ const Login = () => {
           </Link>
         </div>
 
-        {/* Botones de demostración */}
+        {/* Botones de demostración — ahora crean cuentas dinámicas */}
         <div className="flex flex-col gap-2 mt-4 pt-4 border-t border-abyss-text-log/30">
+          <p className="text-xs text-center text-abyss-text-muted mb-1">
+            ¿Quieres explorar sin registrarte?
+          </p>
+
+          {/* Banners de error diferenciados para el sistema demo */}
+          {demoError === 'RATE_LIMIT' && (
+            <div className="flex items-center gap-2 bg-orange-900/50 border border-orange-500 text-orange-200 px-4 py-3 rounded-lg text-sm font-semibold animate-pulse">
+              <span>⚠️</span>
+              <span>Superaste la creación de cuentas demo. Podrás crear más en unas horas.</span>
+            </div>
+          )}
+
+          {demoError === 'CAPACITY_LIMIT' && (
+            <div className="flex items-center gap-2 bg-blue-900/50 border border-blue-500 text-blue-200 px-4 py-3 rounded-lg text-sm font-semibold">
+              <span>🌊</span>
+              <span>Actualmente se ha alcanzado el límite de cuentas de prueba, espera a que se liberen espacios.</span>
+            </div>
+          )}
+
           <button 
+            id="demo-lector-btn"
             type="button"
             disabled={isLoading}
-            onClick={() => handleDemoLogin('Lector@demo.com')}
+            onClick={() => handleDemoCreate('LECTOR')}
             className="text-xs bg-gray-800 hover:bg-gray-700 text-white font-semibold py-2 rounded-lg transition disabled:opacity-50"
           >
-            Acceder como lector demo
+            {isLoading ? 'Creando acceso...' : '⚡ Acceder como lector demo'}
           </button>
           <button 
+            id="demo-miembro-admin-btn"
             type="button"
             disabled={isLoading}
-            onClick={() => handleDemoLogin('MiembroAd@demo.com')}
+            onClick={() => handleDemoCreate('MIEMBRO_ADMIN')}
             className="text-xs bg-gray-800 hover:bg-gray-700 text-white font-semibold py-2 rounded-lg transition disabled:opacity-50"
           >
-            Acceder como Miembro Admin demo
+            {isLoading ? 'Creando acceso...' : '⚡ Acceder como Miembro Admin demo'}
           </button>
           <button 
+            id="demo-master-btn"
             type="button"
             disabled={isLoading}
-            onClick={() => handleDemoLogin('Master@demo.com')}
+            onClick={() => handleDemoCreate('MASTER')}
             className="text-xs bg-gray-800 hover:bg-gray-700 text-white font-semibold py-2 rounded-lg transition disabled:opacity-50"
           >
-            Acceder como master demo
+            {isLoading ? 'Creando acceso...' : '⚡ Acceder como master demo'}
           </button>
         </div>
       </form>

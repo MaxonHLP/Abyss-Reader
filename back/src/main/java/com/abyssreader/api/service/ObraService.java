@@ -14,6 +14,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.http.HttpStatus;
+import com.abyssreader.api.exception.DemoLimitException;
+import com.abyssreader.api.exception.DemoIsolationException;
 
 import java.util.List;
 import java.util.Set;
@@ -47,9 +49,20 @@ public class ObraService {
             throw new RuntimeException("Ya existe una Obra con ese título");
         }
 
+        String authMail = SecurityContextHolder.getContext().getAuthentication().getName();
+        Usuario usuario = usuarioRepository.findByMail(authMail)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+        if (Boolean.TRUE.equals(usuario.getEsDemo())) {
+            if (usuario.getObrasCreadas() != null && usuario.getObrasCreadas() >= 3) {
+                throw new DemoLimitException("Obras", 3);
+            }
+        }
+
         Obra obra = new Obra();
         obra.setTitulo(request.getTitulo());
         obra.setDescripcion(request.getDescripcion());
+        obra.setCreadorId(usuario.getId());
         
         try {
             Tipo tipo = tipoRepository.getReferenceById(request.getTipoId());
@@ -81,6 +94,10 @@ public class ObraService {
             throw new EntityNotFoundException("Uno o más identificadores proporcionados (Tipo, Demografía, Grupo o Géneros) no existen.");
         }
 
+        if (Boolean.TRUE.equals(usuario.getEsDemo())) {
+            usuarioRepository.incrementarObrasCreadas(usuario.getId());
+        }
+
         // Guardar primero para obtener el ID generado
         Obra savedObra = obraRepository.save(obra);
 
@@ -103,8 +120,13 @@ public class ObraService {
 
         String authMail = SecurityContextHolder.getContext().getAuthentication().getName();
         Usuario usuario = usuarioRepository.findByMail(authMail).orElse(null);
-        if (usuario != null && Boolean.TRUE.equals(usuario.getEsDemo()) && Boolean.TRUE.equals(obra.getDataCore())) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "DEMO_RESTRICTION");
+        if (usuario != null && Boolean.TRUE.equals(usuario.getEsDemo())) {
+            if (Boolean.TRUE.equals(obra.getDataCore())) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "DEMO_RESTRICTION");
+            }
+            if (!usuario.getId().equals(obra.getCreadorId())) {
+                throw new DemoIsolationException();
+            }
         }
 
         obra.setTitulo(request.getTitulo());
@@ -173,8 +195,13 @@ public class ObraService {
         Obra obra = obraRepository.findById(obraId)
                 .orElseThrow(() -> new EntityNotFoundException("Obra no encontrada con id: " + obraId));
 
-        if (Boolean.TRUE.equals(usuario.getEsDemo()) && Boolean.TRUE.equals(obra.getDataCore())) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "DEMO_RESTRICTION");
+        if (Boolean.TRUE.equals(usuario.getEsDemo())) {
+            if (Boolean.TRUE.equals(obra.getDataCore())) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "DEMO_RESTRICTION");
+            }
+            if (!usuario.getId().equals(obra.getCreadorId())) {
+                throw new DemoIsolationException();
+            }
         }
 
         // Paso 2 — Purgar GCS: páginas de todos los capítulos

@@ -23,4 +23,7 @@ public interface CapituloRepository extends JpaRepository<Capitulo, Long> {
 
     /** Capítulo anterior: número menor más cercano en la misma obra. */
     Optional<Capitulo> findFirstByObraIdAndNumeroLessThanOrderByNumeroDesc(Long obraId, double numero);
+
+    /** Obtiene todos los capítulos creados por un usuario específico. Usado para limpieza demo. */
+    java.util.List<Capitulo> findByCreadorId(Long creadorId);
 }

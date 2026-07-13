@@ -43,9 +43,27 @@ public class Grupo extends BaseEntity {
 
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    @OneToMany(mappedBy = "grupo", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "grupo", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<Obra> obras = new ArrayList<>();
 
     @Column(nullable = false)
     private Boolean activo = true;
+
+    /**
+     * ID del usuario (MASTER) que creó este grupo.
+     * NULL = grupo creado por el sistema (previo al sistema demo) o datos de exhibición.
+     * Usado para el aislamiento de entorno: un MASTER demo solo puede gestionar
+     * los grupos donde creadorId == su propio id.
+     */
+    @Column(name = "creador_id")
+    private Long creadorId;
+
+    /**
+     * Marca este grupo como contenido de exhibición del sistema.
+     * Los usuarios demo no pueden modificar ni eliminar grupos con dataCore=true,
+     * recibiendo el toast "Contenido de Exhibición" en su lugar.
+     */
+    @Column(nullable = false)
+    private Boolean dataCore = false;
 }
+

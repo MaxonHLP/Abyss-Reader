@@ -11,6 +11,7 @@ import UserProfile from './pages/UserProfile';
 import Home from './pages/Home';
 import ProtectedRoute from './components/ProtectedRoute';
 import DemoProtectionModal from './components/modales/DemoProtectionModal';
+import DemoToastContainer from './components/DemoToastContainer';
 
 function App() {
   return (
@@ -39,6 +40,7 @@ function App() {
 
       {/* Modal global para protección de demo */}
       <DemoProtectionModal />
+      <DemoToastContainer />
     </BrowserRouter>
   );
 }

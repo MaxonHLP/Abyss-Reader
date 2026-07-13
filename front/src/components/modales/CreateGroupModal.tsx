@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { crearGrupo } from '../../services/masterService';
+import { useToastStore } from '../../store/useToastStore';
 
 interface CreateGroupModalProps {
   isOpen: boolean;
@@ -115,9 +116,16 @@ const CreateGroupModal = ({ isOpen, onClose, onSuccess }: CreateGroupModalProps)
       
       onSuccess();
       onClose();
-    } catch (err) {
+    } catch (err: unknown) {
       console.error(err);
-      setError("Ocurrió un error al intentar crear el grupo.");
+      const axiosErr = err as { response?: { data?: { error?: string, message?: string, entidad?: string, limite?: number } } };
+      if (axiosErr.response?.data?.error === 'DEMO_LIMIT') {
+        const { entidad, limite } = axiosErr.response.data;
+        useToastStore.getState().showToast('LIMIT', `Alcanzaste el número máximo de ${entidad} (${limite}).`);
+        onClose();
+      } else {
+        setError(axiosErr.response?.data?.message || "Ocurrió un error al intentar crear el grupo.");
+      }
     } finally {
       setIsLoading(false);
     }

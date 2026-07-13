@@ -22,8 +22,11 @@ import com.abyssreader.api.repository.CapituloLeidoRepository;
 import com.abyssreader.api.repository.UsuarioRepository;
 import com.abyssreader.api.entity.CapituloLeido;
 import com.abyssreader.api.entity.CapituloLeidoId;
+import com.abyssreader.api.entity.Usuario;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.http.HttpStatus;
+import com.abyssreader.api.exception.DemoLimitException;
+import com.abyssreader.api.exception.DemoIsolationException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -74,12 +77,30 @@ public class CapituloService {
         if (capituloRepository.existsByObraIdAndNumero(obraId, numero)) {
             throw new IllegalArgumentException("Ya existe el capítulo " + numero + " para esta obra.");
         }
+
+        String authMail = SecurityContextHolder.getContext().getAuthentication().getName();
+        Usuario usuario = usuarioRepository.findByMail(authMail)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+        if (Boolean.TRUE.equals(usuario.getEsDemo())) {
+            if (usuario.getCapitulosCreados() != null && usuario.getCapitulosCreados() >= 15) {
+                throw new DemoLimitException("Capítulos", 15);
+            }
+        }
+
         Obra obra = obraRepository.getReferenceById(obraId);
         Capitulo capitulo = new Capitulo();
         capitulo.setObra(obra);
         capitulo.setNumero(numero);
         capitulo.setPaginasUrls(request.getPaginasUrls());
+        capitulo.setCreadorId(usuario.getId());
+
         Capitulo guardado = capituloRepository.save(capitulo);
+
+        if (Boolean.TRUE.equals(usuario.getEsDemo())) {
+            usuarioRepository.incrementarCapitulosCreados(usuario.getId());
+        }
+
         return mapToDTO(guardado);
     }
 
@@ -145,8 +166,13 @@ public class CapituloService {
 
         String authMail = SecurityContextHolder.getContext().getAuthentication().getName();
         java.util.Optional<com.abyssreader.api.entity.Usuario> userOpt = usuarioRepository.findByMail(authMail);
-        if (userOpt.isPresent() && Boolean.TRUE.equals(userOpt.get().getEsDemo()) && Boolean.TRUE.equals(capitulo.getDataCore())) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "DEMO_RESTRICTION");
+        if (userOpt.isPresent() && Boolean.TRUE.equals(userOpt.get().getEsDemo())) {
+            if (Boolean.TRUE.equals(capitulo.getDataCore())) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "DEMO_RESTRICTION");
+            }
+            if (!userOpt.get().getId().equals(capitulo.getCreadorId())) {
+                throw new DemoIsolationException();
+            }
         }
 
         // 2. Actualizar número si viene en el DTO
@@ -192,8 +218,13 @@ public class CapituloService {
 
         String authMail = SecurityContextHolder.getContext().getAuthentication().getName();
         java.util.Optional<com.abyssreader.api.entity.Usuario> userOpt = usuarioRepository.findByMail(authMail);
-        if (userOpt.isPresent() && Boolean.TRUE.equals(userOpt.get().getEsDemo()) && Boolean.TRUE.equals(capitulo.getDataCore())) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "DEMO_RESTRICTION");
+        if (userOpt.isPresent() && Boolean.TRUE.equals(userOpt.get().getEsDemo())) {
+            if (Boolean.TRUE.equals(capitulo.getDataCore())) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "DEMO_RESTRICTION");
+            }
+            if (!userOpt.get().getId().equals(capitulo.getCreadorId())) {
+                throw new DemoIsolationException();
+            }
         }
 
         // Paso 1 — Purgar GCS

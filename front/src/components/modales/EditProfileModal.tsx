@@ -294,16 +294,17 @@ export default function EditProfileModal({ isOpen, onClose, descripcionActual, o
           </div>
 
           {/* Datos sensibles condicionales */}
-          {!showSensibleData ? (
-            <button
-              type="button"
-              onClick={() => setShowSensibleData(true)}
-              className="mt-2 py-3 rounded-xl text-sm font-semibold border transition-all duration-200"
-              style={{ borderColor: 'rgba(0,235,219,0.3)', color: '#00EBDB', background: 'rgba(0,235,219,0.05)' }}
-            >
-              Cambiar datos sensibles (Mail o Contraseña)
-            </button>
-          ) : (
+          {!user?.esDemo && (
+            !showSensibleData ? (
+              <button
+                type="button"
+                onClick={() => setShowSensibleData(true)}
+                className="mt-2 py-3 rounded-xl text-sm font-semibold border transition-all duration-200"
+                style={{ borderColor: 'rgba(0,235,219,0.3)', color: '#00EBDB', background: 'rgba(0,235,219,0.05)' }}
+              >
+                Cambiar datos sensibles (Mail o Contraseña)
+              </button>
+            ) : (
             <div className="flex flex-col gap-5 p-4 rounded-xl border border-white/10" style={{ background: 'rgba(0,0,0,0.2)' }}>
               {/* Mail */}
               <div className="flex flex-col">
@@ -336,7 +337,7 @@ export default function EditProfileModal({ isOpen, onClose, descripcionActual, o
                 </div>
               )}
             </div>
-          )}
+          ))}
         </div>
 
         {/* Footer */}

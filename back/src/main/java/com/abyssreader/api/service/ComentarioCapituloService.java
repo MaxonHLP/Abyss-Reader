@@ -136,7 +136,19 @@ public class ComentarioCapituloService {
             comentario.setEliminado(true);
             comentarioCapituloRepository.save(comentario);
         } else {
+            ComentarioCapitulo padre = comentario.getPadre();
             comentarioCapituloRepository.delete(comentario);
+
+            while (padre != null) {
+                padre.getRespuestas().remove(comentario);
+                if (padre.isEliminado() && padre.getRespuestas().isEmpty()) {
+                    comentario = padre;
+                    padre = padre.getPadre();
+                    comentarioCapituloRepository.delete(comentario);
+                } else {
+                    break;
+                }
+            }
         }
     }
 

@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAuthStore } from '../store/useAuthStore';
+import { useToastStore } from '../store/useToastStore';
 import api from '../services/api';
 import CreateChapterModal from '../components/modales/CreateChapterModal';
 import EditChapterModal from '../components/modales/EditChapterModal';
@@ -173,8 +174,17 @@ export default function Work() {
       await api.delete(`/obras/${obra.id}`, { data: { password: deleteObraPassword } });
       navigate(-1);
     } catch (err: unknown) {
-      const e = err as { response?: { data?: { message?: string } } };
-      setDeleteObraError(e.response?.data?.message || 'Contraseña incorrecta o error de servidor.');
+      const e = err as { response?: { data?: { message?: string, error?: string } } };
+      const errCode = e.response?.data?.error;
+      if (errCode === 'DEMO_RESTRICTION') {
+        useToastStore.getState().showToast('DATA_CORE', "Esta obra es un pilar del Abismo y no puede ser erradicada.");
+        resetDeleteObraModal();
+      } else if (errCode === 'DEMO_ISOLATION') {
+        useToastStore.getState().showToast('ISOLATION', "No tienes poder sobre las obras de otro creador.");
+        resetDeleteObraModal();
+      } else {
+        setDeleteObraError(e.response?.data?.message || 'Contraseña incorrecta o error de servidor.');
+      }
     } finally {
       setIsDeletingObra(false);
     }

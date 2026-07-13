@@ -24,4 +24,7 @@ public interface ComentarioObraRepository extends JpaRepository<ComentarioObra, 
      */
     @Query("SELECT COUNT(c) FROM ComentarioObra c WHERE c.obra.id = :obraId AND c.eliminado = false")
     long countActivosByObraId(@Param("obraId") Long obraId);
+
+    /** Obtiene todos los comentarios creados por un autor específico. Usado para limpieza demo. */
+    java.util.List<ComentarioObra> findByAutorId(Long autorId);
 }

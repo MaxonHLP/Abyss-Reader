@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/useAuthStore';
+import { useToastStore } from '../store/useToastStore';
 import { obtenerGrupoPorId } from '../services/groupService';
 import { eliminarGrupo, eliminarMiembro } from '../services/masterService';
 import CreateWorkModal from '../components/modales/CreateWorkModal';
@@ -78,9 +79,19 @@ const GroupDetails = () => {
     try {
       await eliminarGrupo(id, masterPassword);
       navigate('/master');
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error al eliminar grupo:", error);
-      setDeleteError(error.response?.data?.message || "Contraseña incorrecta o error de servidor");
+      const axiosErr = error as { response?: { data?: { error?: string, message?: string } } };
+      const errCode = axiosErr.response?.data?.error;
+      if (errCode === 'DEMO_RESTRICTION') {
+        useToastStore.getState().showToast('DATA_CORE', "Este culto es un pilar del Abismo y no puede ser erradicado.");
+        setShowDeleteConfirm(false);
+      } else if (errCode === 'DEMO_ISOLATION') {
+        useToastStore.getState().showToast('ISOLATION', "No tienes poder sobre los dominios de otro Maestro.");
+        setShowDeleteConfirm(false);
+      } else {
+        setDeleteError(axiosErr.response?.data?.message || "Contraseña incorrecta o error de servidor");
+      }
     } finally {
       setIsDeleting(false);
     }
@@ -93,9 +104,16 @@ const GroupDetails = () => {
       await eliminarMiembro(memberToDelete.id);
       fetchGroup(); // Recargar el grupo
       setMemberToDelete(null);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error al eliminar miembro:", error);
-      alert(error.response?.data?.message || "Ocurrió un error al eliminar el miembro");
+      const axiosErr = error as { response?: { data?: { error?: string, message?: string } } };
+      const errCode = axiosErr.response?.data?.error;
+      if (errCode === 'DEMO_ISOLATION') {
+        useToastStore.getState().showToast('ISOLATION', "No tienes poder sobre los dominios de otro Maestro.");
+        setMemberToDelete(null);
+      } else {
+        alert(axiosErr.response?.data?.message || "Ocurrió un error al eliminar el miembro");
+      }
     } finally {
       setIsDeletingMember(false);
     }

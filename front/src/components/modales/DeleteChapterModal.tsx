@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import api from '../../services/api';
+import { useToastStore } from '../../store/useToastStore';
 
 interface Capitulo {
   id: number;
@@ -40,7 +41,17 @@ export default function DeleteChapterModal({ isOpen, capitulos, onClose, onSucce
         handleClose();
       }, 2000);
     } catch (err: unknown) {
-      const e = err as { response?: { data?: { message?: string } } };
+      const e = err as { response?: { data?: { message?: string, error?: string } } };
+      const errCode = e.response?.data?.error;
+      if (errCode === 'DEMO_RESTRICTION') {
+        useToastStore.getState().showToast('DATA_CORE', "Este capítulo es un pilar del Abismo y no puede ser eliminado.");
+        handleClose();
+        return;
+      } else if (errCode === 'DEMO_ISOLATION') {
+        useToastStore.getState().showToast('ISOLATION', "No tienes poder sobre los capítulos de otro creador.");
+        handleClose();
+        return;
+      }
       setError(e.response?.data?.message || 'Error al eliminar el capítulo.');
       setIsDeleting(false);
     }

@@ -136,7 +136,19 @@ public class ComentarioObraService {
             comentario.setEliminado(true);
             comentarioObraRepository.save(comentario);
         } else {
+            ComentarioObra padre = comentario.getPadre();
             comentarioObraRepository.delete(comentario);
+
+            while (padre != null) {
+                padre.getRespuestas().remove(comentario);
+                if (padre.isEliminado() && padre.getRespuestas().isEmpty()) {
+                    comentario = padre;
+                    padre = padre.getPadre();
+                    comentarioObraRepository.delete(comentario);
+                } else {
+                    break;
+                }
+            }
         }
     }
 

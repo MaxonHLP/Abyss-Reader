@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.security.core.context.SecurityContextHolder;
 import com.abyssreader.api.entity.Usuario;
+import com.abyssreader.api.exception.DemoIsolationException;
 
 @Service
 @RequiredArgsConstructor
@@ -57,11 +58,24 @@ public class MiembroService {
         miembro.setRol(rolParsed);
         miembro.setGrupo(grupo);
 
-        // Herencia de Demo: El nuevo miembro hereda el flag esDemo de su creador
+        // Herencia de Demo e Isolation check
         String creadorMail = SecurityContextHolder.getContext().getAuthentication().getName();
-        usuarioRepository.findByMail(creadorMail).ifPresent(creador -> {
+        Usuario creador = usuarioRepository.findByMail(creadorMail).orElse(null);
+        if (creador != null) {
+            if (Boolean.TRUE.equals(creador.getEsDemo())) {
+                if (creador.getRol() == Rol.MASTER) {
+                    if (!creador.getId().equals(grupo.getCreadorId())) {
+                        throw new DemoIsolationException();
+                    }
+                } else if (creador instanceof Miembro) {
+                    Miembro creadorMiembro = (Miembro) creador;
+                    if (creadorMiembro.getGrupo() == null || !creadorMiembro.getGrupo().getId().equals(grupo.getId())) {
+                        throw new DemoIsolationException();
+                    }
+                }
+            }
             miembro.setEsDemo(creador.getEsDemo());
-        });
+        }
 
         Miembro savedMiembro = miembroRepository.save(miembro);
         return mapToDTO(savedMiembro);
@@ -71,6 +85,24 @@ public class MiembroService {
     public void deleteMiembro(Long id) {
         Miembro miembro = miembroRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Miembro no encontrado con id: " + id));
+        
+        String authMail = SecurityContextHolder.getContext().getAuthentication().getName();
+        Usuario usuario = usuarioRepository.findByMail(authMail).orElse(null);
+        if (usuario != null && Boolean.TRUE.equals(usuario.getEsDemo())) {
+            Grupo grupo = miembro.getGrupo();
+            if (grupo != null) {
+                if (usuario.getRol() == Rol.MASTER) {
+                    if (!usuario.getId().equals(grupo.getCreadorId())) {
+                        throw new DemoIsolationException();
+                    }
+                } else if (usuario instanceof Miembro) {
+                    Miembro userMiembro = (Miembro) usuario;
+                    if (userMiembro.getGrupo() == null || !userMiembro.getGrupo().getId().equals(grupo.getId())) {
+                        throw new DemoIsolationException();
+                    }
+                }
+            }
+        }
         
         // Limpiar la tabla intermedia obra_staff para evitar violación de llave foránea
         obraRepository.removeMiembroFromAllObras(id);

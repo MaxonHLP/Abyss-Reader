@@ -15,4 +15,8 @@ public class AuthResponse {
     private Rol rol;
     private Long grupoId;
     private String fotoPerfil;
+    /** Token de reinicio para el flujo de sesión demo dual. Null para usuarios normales. */
+    private String reinitToken;
+    /** Indica si la cuenta es de tipo demo efímero. */
+    private Boolean esDemo;
 }

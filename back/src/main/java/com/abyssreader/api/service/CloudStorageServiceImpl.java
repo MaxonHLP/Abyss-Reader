@@ -39,8 +39,8 @@ public class CloudStorageServiceImpl implements StorageService {
         try {
             org.springframework.security.core.Authentication auth = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
             if (auth != null && auth.isAuthenticated() && !auth.getPrincipal().equals("anonymousUser")) {
-                if (auth.getName().endsWith("@demo.com")) {
-                    folderPath = "demo-uploads/" + folderPath;
+                if (auth.getName().endsWith("@demo.temp")) {
+                    folderPath = "demoUploads/" + folderPath;
                 }
             }
 
@@ -108,6 +108,13 @@ public class CloudStorageServiceImpl implements StorageService {
      */
     @Override
     public SignedUrlsResponseDTO generarUrlsFirmadas(List<SignedUrlRequestItem> archivos, String folderPath) {
+        org.springframework.security.core.Authentication auth = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+        if (auth != null && auth.isAuthenticated() && !auth.getPrincipal().equals("anonymousUser")) {
+            if (auth.getName().endsWith("@demo.temp")) {
+                folderPath = "demoUploads/" + folderPath;
+            }
+        }
+
         List<SignedUrlsResponseDTO.SignedUrlItem> items = new ArrayList<>();
 
         for (SignedUrlRequestItem archivo : archivos) {

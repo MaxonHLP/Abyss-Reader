@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -38,5 +39,11 @@ public interface ObraRepository extends JpaRepository<Obra, Long>, JpaSpecificat
     @Modifying
     @Query(value = "DELETE FROM obra_staff WHERE miembro_id = :miembroId", nativeQuery = true)
     void removeMiembroFromAllObras(@Param("miembroId") Long miembroId);
+
+    /** Obtiene todas las obras activas de un grupo. Usado por DemoCleanupTask para limpiar obras demo. */
+    List<Obra> findByGrupoId(Long grupoId);
+
+    /** Obtiene todas las obras creadas por un usuario específico. Usado para limpieza demo. */
+    List<Obra> findByCreadorId(Long creadorId);
 }
 

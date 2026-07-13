@@ -79,4 +79,12 @@ public class Obra extends BaseEntity {
     @Column(nullable = false)
     private Boolean dataCore = false;
 
+    /**
+     * ID del usuario que creó esta obra.
+     * NULL = obra creada previamente al sistema demo o datos de exhibición.
+     * Usado para aislamiento de entorno demo.
+     */
+    @Column(name = "creador_id")
+    private Long creadorId;
 }
+

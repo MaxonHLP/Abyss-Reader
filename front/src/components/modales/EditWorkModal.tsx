@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import api from '../../services/api';
+import { useToastStore } from '../../store/useToastStore';
 
 interface CatalogItem {
   id: number;
@@ -234,6 +235,18 @@ const EditWorkModal = ({ isOpen, obraId, onClose, onSuccess }: EditWorkModalProp
       console.error(err);
       const axiosErr = err as { response?: { data?: { message?: string } | string } };
       const raw = axiosErr?.response?.data;
+      if (typeof raw === 'object' && raw !== null && 'error' in raw) {
+        const errCode = (raw as Record<string, unknown>).error;
+        if (errCode === 'DEMO_RESTRICTION') {
+          useToastStore.getState().showToast('DATA_CORE', "Esta obra es un pilar del Abismo y no puede ser modificada.");
+          handleClose();
+          return;
+        } else if (errCode === 'DEMO_ISOLATION') {
+          useToastStore.getState().showToast('ISOLATION', "No tienes poder sobre las obras de otro creador.");
+          handleClose();
+          return;
+        }
+      }
       const msg =
         (typeof raw === 'object' && raw !== null && 'message' in raw ? raw.message : undefined) ||
         (typeof raw === 'string' ? raw : undefined) ||

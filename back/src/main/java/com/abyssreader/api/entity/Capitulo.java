@@ -40,4 +40,13 @@ public class Capitulo extends BaseEntity {
 
     @Column(nullable = false)
     private Boolean dataCore = false;
+
+    /**
+     * ID del usuario que creó este capítulo.
+     * NULL = capítulo previo al sistema demo o de datos de exhibición.
+     * Usado para aislamiento de entorno demo.
+     */
+    @Column(name = "creador_id")
+    private Long creadorId;
 }
+

@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import api from '../../services/api';
+import { useToastStore } from '../../store/useToastStore';
 
 interface CatalogItem {
   id: number;
@@ -202,6 +203,12 @@ const CreateWorkModal = ({ isOpen, groupId, onClose, onSuccess }: CreateWorkModa
       console.error(err);
       const axiosErr = err as { response?: { data?: { message?: string } | string } };
       const raw = axiosErr?.response?.data;
+      if (typeof raw === 'object' && raw !== null && 'error' in raw && raw.error === 'DEMO_LIMIT') {
+        const { entidad, limite } = raw as Record<string, unknown>;
+        useToastStore.getState().showToast('LIMIT', `Alcanzaste el número máximo de ${entidad} (${limite}).`);
+        onClose();
+        return;
+      }
       const msg =
         (typeof raw === 'object' && raw !== null && 'message' in raw ? raw.message : undefined) ||
         (typeof raw === 'string' ? raw : undefined) ||

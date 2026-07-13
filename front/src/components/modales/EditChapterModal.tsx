@@ -15,6 +15,7 @@ import {
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import api from '../../services/api';
+import { useToastStore } from '../../store/useToastStore';
 
 // ─── Interfaces ───────────────────────────────────────────────────────────────
 
@@ -370,6 +371,18 @@ const EditChapterModal = ({
       console.error(err);
       const axiosErr = err as { response?: { data?: { message?: string } | string } };
       const raw = axiosErr?.response?.data;
+      if (typeof raw === 'object' && raw !== null && 'error' in raw) {
+        const errCode = (raw as Record<string, unknown>).error;
+        if (errCode === 'DEMO_RESTRICTION') {
+          useToastStore.getState().showToast('DATA_CORE', "Este capítulo es un pilar del Abismo y no puede ser modificado.");
+          handleClose();
+          return;
+        } else if (errCode === 'DEMO_ISOLATION') {
+          useToastStore.getState().showToast('ISOLATION', "No tienes poder sobre los capítulos de otro creador.");
+          handleClose();
+          return;
+        }
+      }
       const msg =
         (typeof raw === 'object' && raw !== null && 'message' in raw ? raw.message : undefined) ||
         (typeof raw === 'string' ? raw : undefined) ||
