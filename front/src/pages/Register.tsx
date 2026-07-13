@@ -4,6 +4,7 @@ import axios from 'axios';
 import api from '../services/api';
 import bgLog from '../assets/bg-log.png';
 import Navbar from '../components/Navbar';
+import { useAuthStore } from '../store/useAuthStore';
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -16,6 +17,7 @@ const Register = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const navigate = useNavigate();
+  const { login } = useAuthStore();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -43,14 +45,17 @@ const Register = () => {
 
     setIsLoading(true);
     try {
-      await api.post('/auth/register', {
+      const response = await api.post('/auth/register', {
         nombre: formData.nombre,
         mail: formData.email,
         contrasena: formData.password
       });
 
-      // Si el registro es exitoso, lo enviamos al login para que inicie sesión
-      navigate('/login');
+      const { token, ...userData } = response.data;
+      login(token, userData);
+
+      // Si el registro es exitoso, iniciamos sesión automáticamente y redirigimos al inicio
+      navigate('/');
     } catch (err) {
       console.error("Error en registro:", err);
       // Intentamos obtener el mensaje de error del backend de forma segura usando un Type Guard
