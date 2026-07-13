@@ -33,7 +33,7 @@ public class GrupoService {
     private final GrupoRepository grupoRepository;
     private final StorageService storageService;
     private final UsuarioRepository usuarioRepository;
-    private final PasswordEncoder passwordEncoder;
+
 
     @Transactional
     public GrupoResponseDTO createGrupo(GrupoRequestDTO request, MultipartFile portada) {
