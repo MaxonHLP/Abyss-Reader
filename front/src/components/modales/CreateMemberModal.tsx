@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import api from '../../services/api';
+import CustomSelect from '../ui/CustomSelect';
 
 interface CreateMemberModalProps {
   isOpen: boolean;
@@ -106,14 +107,15 @@ const CreateMemberModal = ({ isOpen, groupId, onClose, onSuccess }: CreateMember
 
           <div className="flex flex-col">
             <label className="text-abyss-text-titles-form-crear font-semibold mb-1">Rol en el Culto</label>
-            <select 
+            <CustomSelect 
               value={rol}
-              onChange={(e) => setRol(e.target.value)}
+              onChange={(val) => setRol(String(val))}
+              options={[
+                { value: 'MIEMBRO', label: 'Miembro' },
+                { value: 'MIEMBRO_ADMIN', label: 'Miembro Administrador' }
+              ]}
               className="bg-abyss-bg-input-form-crear text-abyss-text-input-form-crear border border-abyss-border-input-form-crear rounded-lg p-3 outline-none focus:ring-2 focus:ring-abyss-border-input-form-crear transition-shadow font-bold"
-            >
-              <option value="MIEMBRO">Miembro</option>
-              <option value="MIEMBRO_ADMIN">Miembro Administrador</option>
-            </select>
+            />
           </div>
 
           {error && <p className="text-red-800 text-sm font-bold text-center bg-red-200/50 p-2 rounded">{error}</p>}

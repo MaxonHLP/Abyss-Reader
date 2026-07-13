@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import api from '../../services/api';
 import { useToastStore } from '../../store/useToastStore';
+import CustomSelect from '../ui/CustomSelect';
 
 interface CatalogItem {
   id: number;
@@ -345,31 +346,25 @@ const CreateWorkModal = ({ isOpen, groupId, onClose, onSuccess }: CreateWorkModa
             {/* Tipo */}
             <div className="flex flex-col">
               <label className={labelClass}>Tipo</label>
-              <select
-                value={tipoId}
-                onChange={e => setTipoId(Number(e.target.value))}
+              <CustomSelect
+                value={tipoId || ''}
+                onChange={(val) => setTipoId(Number(val))}
+                options={tipos.map(t => ({ value: t.id, label: t.nombre }))}
+                placeholder="— Seleccionar tipo —"
                 className={selectClass}
-              >
-                <option value="">— Seleccionar tipo —</option>
-                {tipos.map(t => (
-                  <option key={t.id} value={t.id}>{t.nombre}</option>
-                ))}
-              </select>
+              />
             </div>
 
             {/* Demografía */}
             <div className="flex flex-col">
               <label className={labelClass}>Demografía</label>
-              <select
-                value={demografiaId}
-                onChange={e => setDemografiaId(Number(e.target.value))}
+              <CustomSelect
+                value={demografiaId || ''}
+                onChange={(val) => setDemografiaId(Number(val))}
+                options={demografias.map(d => ({ value: d.id, label: d.nombre }))}
+                placeholder="— Seleccionar demografía —"
                 className={selectClass}
-              >
-                <option value="">— Seleccionar demografía —</option>
-                {demografias.map(d => (
-                  <option key={d.id} value={d.id}>{d.nombre}</option>
-                ))}
-              </select>
+              />
             </div>
 
             {/* Géneros (multi-select con checkboxes) */}

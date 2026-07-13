@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import api from '../../services/api';
 import { useToastStore } from '../../store/useToastStore';
+import CustomSelect from '../ui/CustomSelect';
 
 interface Capitulo {
   id: number;
@@ -87,18 +88,15 @@ export default function DeleteChapterModal({ isOpen, capitulos, onClose, onSucce
           <label className="text-abyss-text-titles-form-crear/70 text-sm font-semibold">
             Seleccioná el capítulo a eliminar
           </label>
-          <select
+          <CustomSelect
             value={capituloSeleccionado}
-            onChange={e => setCapituloSeleccionado(e.target.value ? Number(e.target.value) : '')}
+            onChange={(val) => setCapituloSeleccionado(val ? Number(val) : '')}
+            options={capitulos.map(cap => ({
+              value: cap.id,
+              label: `Capítulo ${cap.numero % 1 === 0 ? Math.floor(cap.numero) : cap.numero}`
+            }))}
             className="bg-abyss-bg-input-form-crear text-abyss-text-input-form-crear border border-abyss-border-input-form-crear rounded-lg px-4 py-3 outline-none focus:ring-2 focus:ring-abyss-border-input-form-crear transition-shadow appearance-none"
-          >
-            <option value="">— Seleccionar —</option>
-            {capitulos.map(cap => (
-              <option key={cap.id} value={cap.id}>
-                Capítulo {cap.numero % 1 === 0 ? Math.floor(cap.numero) : cap.numero}
-              </option>
-            ))}
-          </select>
+          />
         </div>
 
         {/* Advertencia */}

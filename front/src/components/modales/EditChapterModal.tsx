@@ -16,6 +16,7 @@ import {
 import { CSS } from '@dnd-kit/utilities';
 import api from '../../services/api';
 import { useToastStore } from '../../store/useToastStore';
+import CustomSelect from '../ui/CustomSelect';
 
 // ─── Interfaces ───────────────────────────────────────────────────────────────
 
@@ -428,22 +429,17 @@ const EditChapterModal = ({
               Esta obra no tiene capítulos.
             </p>
           ) : (
-            <select
+            <CustomSelect
               className={inputClass}
               value={capituloSeleccionado?.id ?? ''}
-              onChange={handleSelectCapitulo}
+              onChange={(val) => handleSelectCapitulo({ target: { value: String(val) } } as React.ChangeEvent<HTMLSelectElement>)}
               disabled={isWorking}
-            >
-              <option value="">— Seleccioná un capítulo —</option>
-              {capitulos.map((cap) => (
-                <option key={cap.id} value={cap.id}>
-                  Capítulo {cap.numero % 1 === 0 ? Math.floor(cap.numero) : cap.numero}
-                  {cap.createdAt
-                    ? `  ·  ${new Date(cap.createdAt).toLocaleDateString('es-AR')}`
-                    : ''}
-                </option>
-              ))}
-            </select>
+              placeholder="— Seleccioná un capítulo —"
+              options={capitulos.map((cap) => ({
+                value: cap.id,
+                label: `Capítulo ${cap.numero % 1 === 0 ? Math.floor(cap.numero) : cap.numero}${cap.createdAt ? `  ·  ${new Date(cap.createdAt).toLocaleDateString('es-AR')}` : ''}`
+              }))}
+            />
           )}
         </div>
 

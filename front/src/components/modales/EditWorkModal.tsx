@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import api from '../../services/api';
 import { useToastStore } from '../../store/useToastStore';
+import CustomSelect from '../ui/CustomSelect';
 
 interface CatalogItem {
   id: number;
@@ -303,31 +304,31 @@ const EditWorkModal = ({ isOpen, obraId, onClose, onSuccess }: EditWorkModalProp
                 {/* Estado */}
                 <div>
                   <label className={labelClass}>Estado</label>
-                  <select
+                  <CustomSelect
                     value={estado}
-                    onChange={e => setEstado(e.target.value)}
+                    onChange={(val) => setEstado(String(val))}
+                    options={[
+                      { value: 'EN_EMISION', label: 'EN EMISIÓN' },
+                      { value: 'PAUSADO', label: 'PAUSADO' },
+                      { value: 'FINALIZADO', label: 'FINALIZADO' }
+                    ]}
                     className={inputClass}
-                  >
-                    <option value="EN_EMISION">EN EMISIÓN</option>
-                    <option value="PAUSADO">PAUSADO</option>
-                    <option value="FINALIZADO">FINALIZADO</option>
-                  </select>
+                  />
                 </div>
 
                 {/* Géneros */}
                 <div>
                   <label className={labelClass}>Géneros</label>
                   <div className="flex gap-2 mb-3">
-                    <select
-                      value={generoSeleccionado}
-                      onChange={e => setGeneroSeleccionado(Number(e.target.value))}
-                      className={`${inputClass} flex-1`}
-                    >
-                      <option value="">— Agregar género —</option>
-                      {generosDisponibles.map(g => (
-                        <option key={g.id} value={g.id}>{g.nombre}</option>
-                      ))}
-                    </select>
+                    <div className="flex-1">
+                      <CustomSelect
+                        value={generoSeleccionado || ''}
+                        onChange={(val) => setGeneroSeleccionado(Number(val))}
+                        options={generosDisponibles.map(g => ({ value: g.id, label: g.nombre }))}
+                        placeholder="— Agregar género —"
+                        className={inputClass}
+                      />
+                    </div>
                     <button
                       type="button"
                       onClick={handleAgregarGenero}
