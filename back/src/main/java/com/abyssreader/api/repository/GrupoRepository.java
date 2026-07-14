@@ -14,4 +14,6 @@ public interface GrupoRepository extends JpaRepository<Grupo, Long> {
 
     /** Retorna todos los grupos creados por un usuario específico. Usado para el filtrado demo. */
     List<Grupo> findByCreadorId(Long creadorId);
+
+    List<Grupo> findByActivoFalse();
 }

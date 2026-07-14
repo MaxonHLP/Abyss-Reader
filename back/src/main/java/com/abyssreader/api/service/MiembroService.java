@@ -26,6 +26,9 @@ public class MiembroService {
     private final GrupoRepository grupoRepository;
     private final UsuarioRepository usuarioRepository;
     private final com.abyssreader.api.repository.ObraRepository obraRepository;
+    private final com.abyssreader.api.repository.ComentarioObraRepository comentarioObraRepository;
+    private final com.abyssreader.api.repository.ComentarioCapituloRepository comentarioCapituloRepository;
+    private final com.abyssreader.api.repository.CapituloRepository capituloRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Transactional
@@ -114,6 +117,25 @@ public class MiembroService {
         
         // Limpiar la tabla intermedia obra_staff para evitar violación de llave foránea
         obraRepository.removeMiembroFromAllObras(id);
+
+        // Eliminar comentarios (Hard Delete en cascada)
+        java.util.List<com.abyssreader.api.entity.ComentarioObra> comentariosObra = comentarioObraRepository.findByAutorId(id);
+        comentarioObraRepository.deleteAll(comentariosObra);
+
+        java.util.List<com.abyssreader.api.entity.ComentarioCapitulo> comentariosCapitulo = comentarioCapituloRepository.findByAutorId(id);
+        comentarioCapituloRepository.deleteAll(comentariosCapitulo);
+
+        // Eliminar capítulos creados por el miembro
+        java.util.List<com.abyssreader.api.entity.Capitulo> capitulos = capituloRepository.findByCreadorId(id);
+        capituloRepository.deleteAll(capitulos);
+
+        // Eliminar obras creadas por el miembro
+        java.util.List<com.abyssreader.api.entity.Obra> obras = obraRepository.findByCreadorId(id);
+        obraRepository.deleteAll(obras);
+
+        // Eliminar grupos creados por el miembro
+        java.util.List<Grupo> gruposCreados = grupoRepository.findByCreadorId(id);
+        grupoRepository.deleteAll(gruposCreados);
 
         miembroRepository.delete(miembro);
     }

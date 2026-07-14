@@ -6,16 +6,11 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.NoArgsConstructor;
 
-import org.hibernate.annotations.SQLDelete;
-import org.hibernate.annotations.SQLRestriction;
-
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "usuarios")
 @Inheritance(strategy = InheritanceType.JOINED) // Preparado para Lector y Miembro
-@SQLDelete(sql = "UPDATE usuarios SET activo = false WHERE id = ?")
-@SQLRestriction("activo = true")
 @Getter
 @Setter
 @NoArgsConstructor

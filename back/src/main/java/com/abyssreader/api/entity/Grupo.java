@@ -15,13 +15,8 @@ import lombok.EqualsAndHashCode;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.hibernate.annotations.SQLDelete;
-import org.hibernate.annotations.SQLRestriction;
-
 @Entity
 @Table(name = "grupos")
-@SQLDelete(sql = "UPDATE grupos SET activo = false WHERE id = ?")
-@SQLRestriction("activo = true")
 @Getter
 @Setter
 @NoArgsConstructor

@@ -53,4 +53,6 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
     @Modifying
     @Query("UPDATE Usuario u SET u.capitulosCreados = u.capitulosCreados + 1 WHERE u.id = :id")
     void incrementarCapitulosCreados(@Param("id") Long id);
+
+    List<Usuario> findByActivoFalse();
 }
