@@ -12,6 +12,7 @@ import Home from './pages/Home';
 import ProtectedRoute from './components/ProtectedRoute';
 import DemoProtectionModal from './components/modales/DemoProtectionModal';
 import DemoToastContainer from './components/DemoToastContainer';
+import NotFound from './pages/NotFound';
 
 function App() {
   return (
@@ -36,6 +37,9 @@ function App() {
         <Route element={<ProtectedRoute requiredRole="MASTER" />}>
           <Route path="/master" element={<MasterDashboard />} />
         </Route>
+
+        {/* Ruta por defecto (404) */}
+        <Route path="*" element={<NotFound />} />
       </Routes>
 
       {/* Modal global para protección de demo */}

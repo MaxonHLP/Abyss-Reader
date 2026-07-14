@@ -51,13 +51,13 @@ public class SecurityConfig {
                 // Configuramos los permisos de las rutas
                 .authorizeHttpRequests(authz -> authz
                         // Permitir GET públicos a catálogos, lectura de capítulos, obras y comentarios
-                        .requestMatchers(HttpMethod.GET, "/api/tipos/**", "/api/demografias/**", "/api/generos/**", "/api/grupos/**", "/api/obras/**", "/api/obra/**", "/api/miembros/**", "/api/catalogo/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/tipos", "/api/tipos/**", "/api/demografias", "/api/demografias/**", "/api/generos", "/api/generos/**", "/api/grupos", "/api/grupos/**", "/api/obras", "/api/obras/**", "/api/obra/**", "/api/miembros", "/api/miembros/**", "/api/catalogo", "/api/catalogo/**").permitAll()
                         // GET público de comentarios de capítulos
                         .requestMatchers(HttpMethod.GET, "/api/capitulos/**").permitAll()
                         // Comentarios: DELETE protegido (autor/MASTER)
                         .requestMatchers(HttpMethod.DELETE, "/api/comentarios/**").authenticated()
-                        // Permitir todas las peticiones a los endpoints de autenticación
-                        .requestMatchers("/api/auth/**").permitAll()
+                        // Permitir todas las peticiones a los endpoints de autenticación y errores
+                        .requestMatchers("/api/auth/**", "/error").permitAll()
                         // Perfil del usuario autenticado
                         .requestMatchers("/api/usuarios/me").authenticated()
                         // Edición de capítulos — requiere autenticación (el rol lo verifica @PreAuthorize)

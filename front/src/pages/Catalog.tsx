@@ -34,6 +34,16 @@ export default function Catalog() {
   // State for works results
   const [obras, setObras] = useState<Obra[]>([]);
   
+  // State for search input (only triggers on enter)
+  const currentTitulo = searchParams.get('titulo') || '';
+  const [searchValue, setSearchValue] = useState(currentTitulo);
+  const [prevTitulo, setPrevTitulo] = useState(currentTitulo);
+
+  if (currentTitulo !== prevTitulo) {
+    setPrevTitulo(currentTitulo);
+    setSearchValue(currentTitulo);
+  }
+  
   // Load filter options on mount
   useEffect(() => {
     obtenerCaracteristicas().then((data) => {
@@ -52,6 +62,9 @@ export default function Catalog() {
           params[key] = value;
         });
         
+        // Paginación por defecto de 15 obras
+        params['size'] = '15';
+        
         const response = await api.get('/catalogo', { params });
         // Handling paginated Spring Boot response if applicable
         if (response.data && Array.isArray(response.data.content)) {
@@ -66,15 +79,16 @@ export default function Catalog() {
     fetchObras();
   }, [searchParams]);
 
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const text = e.target.value;
-    const newParams = new URLSearchParams(searchParams);
-    if (text) {
-      newParams.set('titulo', text);
-    } else {
-      newParams.delete('titulo');
+  const handleSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      const newParams = new URLSearchParams(searchParams);
+      if (searchValue) {
+        newParams.set('titulo', searchValue);
+      } else {
+        newParams.delete('titulo');
+      }
+      setSearchParams(newParams);
     }
-    setSearchParams(newParams);
   };
 
   const handleCheckboxChange = (category: string, id: number, checked: boolean) => {
@@ -121,8 +135,10 @@ export default function Catalog() {
             <input
               type="text"
               placeholder="Buscar título, autor..."
-              value={searchParams.get('titulo') || ''}
-              onChange={handleSearchChange}
+              value={searchValue}
+              onChange={(e) => setSearchValue(e.target.value)}
+              onKeyDown={handleSearchKeyDown}
+              maxLength={60}
               className="w-full pl-12 pr-4 py-3 rounded-lg bg-abyss-bg-barra-busqueda text-abyss-text-barra-busqueda placeholder-abyss-text-barra-busqueda/60 border border-abyss-border-input focus:outline-none focus:ring-2 focus:ring-abyss-text-barra-busqueda shadow-inner transition-all"
             />
           </div>

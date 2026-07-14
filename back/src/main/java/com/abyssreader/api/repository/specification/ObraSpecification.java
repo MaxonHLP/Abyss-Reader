@@ -51,7 +51,7 @@ public class ObraSpecification {
                 
                 subquery.select(cb.literal(1L))
                         .where(
-                            cb.equal(subqueryRoot, root),
+                            cb.equal(subqueryRoot.get("id"), root.get("id")),
                             cb.equal(subqueryJoin.get("id"), generoId)
                         );
                 
