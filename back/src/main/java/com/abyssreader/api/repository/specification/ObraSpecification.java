@@ -46,14 +46,11 @@ public class ObraSpecification {
             
             for (Long generoId : generosIds) {
                 jakarta.persistence.criteria.Subquery<Long> subquery = query.subquery(Long.class);
-                jakarta.persistence.criteria.Root<Obra> subqueryRoot = subquery.from(Obra.class);
-                Join<Obra, Genero> subqueryJoin = subqueryRoot.join("generos");
+                jakarta.persistence.criteria.Root<Obra> correlatedObra = subquery.correlate(root);
+                Join<Obra, Genero> subqueryJoin = correlatedObra.join("generos");
                 
                 subquery.select(cb.literal(1L))
-                        .where(
-                            cb.equal(subqueryRoot.get("id"), root.get("id")),
-                            cb.equal(subqueryJoin.get("id"), generoId)
-                        );
+                        .where(cb.equal(subqueryJoin.get("id"), generoId));
                 
                 finalPredicate = cb.and(finalPredicate, cb.exists(subquery));
             }
