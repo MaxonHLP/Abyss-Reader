@@ -56,8 +56,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/capitulos/**").permitAll()
                         // Comentarios: DELETE protegido (autor/MASTER)
                         .requestMatchers(HttpMethod.DELETE, "/api/comentarios/**").authenticated()
-                        // Permitir todas las peticiones a los endpoints de autenticación y errores
-                        .requestMatchers("/api/auth/**", "/error").permitAll()
+                        // Permitir todas las peticiones a los endpoints de autenticación, errores y health check
+                        .requestMatchers("/api/auth/**", "/error", "/api/health").permitAll()
                         // Perfil del usuario autenticado
                         .requestMatchers("/api/usuarios/me").authenticated()
                         // Edición de capítulos — requiere autenticación (el rol lo verifica @PreAuthorize)
