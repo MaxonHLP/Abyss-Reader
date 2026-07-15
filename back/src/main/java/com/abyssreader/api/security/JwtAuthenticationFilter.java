@@ -28,6 +28,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
 
+        // --- LA SOLUCIÓN DEFINITIVA A CORS ---
+        // Si la petición es OPTIONS, la dejamos pasar sin pedirle Token
+        if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
         // 1. Obtener el token de la cabecera HTTP
         String token = obtenerJwtDeLaSolicitud(request);
 
