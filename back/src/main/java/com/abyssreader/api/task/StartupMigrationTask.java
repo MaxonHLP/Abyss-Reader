@@ -8,6 +8,7 @@ import com.abyssreader.api.repository.ObraRepository;
 import com.abyssreader.api.repository.CapituloRepository;
 import com.abyssreader.api.repository.ComentarioObraRepository;
 import com.abyssreader.api.repository.ComentarioCapituloRepository;
+import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,7 +37,9 @@ public class StartupMigrationTask {
     private final CapituloRepository capituloRepository;
     private final ComentarioObraRepository comentarioObraRepository;
     private final ComentarioCapituloRepository comentarioCapituloRepository;
+    private final EntityManager entityManager;
 
+    @SuppressWarnings("unchecked")
     @EventListener(ApplicationReadyEvent.class)
     @Transactional
     public void cleanupZombiesOnStartup() {
@@ -47,33 +50,33 @@ public class StartupMigrationTask {
         if (!usuariosInactivos.isEmpty()) {
             logger.info("Se encontraron {} usuarios inactivos (soft-deleted). Procediendo a su eliminación física.", usuariosInactivos.size());
             for (Usuario usuario : usuariosInactivos) {
-                Long id = usuario.getId();
-                
-                // Desvincular de la tabla staff
-                obraRepository.removeMiembroFromAllObras(id);
-
-                // Borrar comentarios
-                comentarioObraRepository.deleteAll(comentarioObraRepository.findByAutorId(id));
-                comentarioCapituloRepository.deleteAll(comentarioCapituloRepository.findByAutorId(id));
-
-                // Borrar capítulos y obras
-                capituloRepository.deleteAll(capituloRepository.findByCreadorId(id));
-                obraRepository.deleteAll(obraRepository.findByCreadorId(id));
-
-                // Borrar grupos
-                grupoRepository.deleteAll(grupoRepository.findByCreadorId(id));
-
-                // Borrar físicamente al usuario
-                usuarioRepository.delete(usuario);
+                try {
+                    Long id = usuario.getId();
+                    obraRepository.removeMiembroFromAllObras(id);
+                    comentarioObraRepository.deleteAll(comentarioObraRepository.findByAutorId(id));
+                    comentarioCapituloRepository.deleteAll(comentarioCapituloRepository.findByAutorId(id));
+                    capituloRepository.deleteAll(capituloRepository.findByCreadorId(id));
+                    obraRepository.deleteAll(obraRepository.findByCreadorId(id));
+                    grupoRepository.deleteAll(grupoRepository.findByCreadorId(id));
+                    usuarioRepository.delete(usuario);
+                } catch (Exception e) {
+                    logger.warn("StartupMigration: error al limpiar usuario inactivo id={}: {}", usuario.getId(), e.getMessage());
+                }
             }
             logger.info("Limpieza de usuarios inactivos finalizada.");
         }
 
-        // 2. Limpiar grupos soft-deleted (que pudieran no estar asociados a un usuario ya borrado)
-        List<Grupo> gruposInactivos = grupoRepository.findByActivoFalse();
+        // 2. Limpiar grupos soft-deleted — se usa native query para bypassear @SQLRestriction
+        List<Grupo> gruposInactivos = entityManager
+                .createNativeQuery("SELECT * FROM grupos WHERE activo = false", Grupo.class)
+                .getResultList();
         if (!gruposInactivos.isEmpty()) {
             logger.info("Se encontraron {} grupos inactivos (soft-deleted). Procediendo a su eliminación física.", gruposInactivos.size());
-            grupoRepository.deleteAll(gruposInactivos);
+            try {
+                entityManager.createNativeQuery("DELETE FROM grupos WHERE activo = false").executeUpdate();
+            } catch (Exception e) {
+                logger.warn("StartupMigration: error al limpiar grupos inactivos: {}", e.getMessage());
+            }
             logger.info("Limpieza de grupos inactivos finalizada.");
         }
         

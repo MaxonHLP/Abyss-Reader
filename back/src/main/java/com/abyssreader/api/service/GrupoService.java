@@ -97,14 +97,19 @@ public class GrupoService {
 
     @Transactional(readOnly = true)
     public List<GrupoResponseDTO> getAllGrupos() {
-        var auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth != null && auth.isAuthenticated() && !"anonymousUser".equals(auth.getName())) {
-            Usuario usuario = usuarioRepository.findByMail(auth.getName()).orElse(null);
-            if (usuario != null && Boolean.TRUE.equals(usuario.getEsDemo()) && usuario.getRol() == Rol.MASTER) {
-                return grupoRepository.findByCreadorId(usuario.getId()).stream()
-                        .map(this::mapToDTO)
-                        .collect(Collectors.toList());
+        try {
+            var auth = SecurityContextHolder.getContext().getAuthentication();
+            if (auth != null && auth.isAuthenticated() && !"anonymousUser".equals(auth.getName())) {
+                Usuario usuario = usuarioRepository.findByMail(auth.getName()).orElse(null);
+                if (usuario != null && Boolean.TRUE.equals(usuario.getEsDemo()) && usuario.getRol() == Rol.MASTER) {
+                    return grupoRepository.findByCreadorId(usuario.getId()).stream()
+                            .map(this::mapToDTO)
+                            .collect(Collectors.toList());
+                }
             }
+        } catch (Exception e) {
+            // Si falla el filtro demo (usuario eliminado, token expirado, etc.),
+            // caemos al comportamiento público por defecto sin crashear el endpoint.
         }
 
         return grupoRepository.findAll().stream()

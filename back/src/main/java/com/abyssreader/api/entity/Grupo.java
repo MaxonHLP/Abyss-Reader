@@ -6,6 +6,8 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.CascadeType;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -17,6 +19,8 @@ import java.util.List;
 
 @Entity
 @Table(name = "grupos")
+@SQLDelete(sql = "UPDATE grupos SET activo = false WHERE id = ?")
+@SQLRestriction("activo = true")
 @Getter
 @Setter
 @NoArgsConstructor
