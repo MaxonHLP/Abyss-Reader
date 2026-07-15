@@ -282,6 +282,7 @@ public class ObraService {
         return pageObras.map(this::mapToDTO);
     }
 
+    @Transactional(readOnly = true)
     public Page<ObraResponseDTO> obtenerObrasRecientes(Pageable pageable) {
         Page<Obra> pageObras = obraRepository.findByOrderByUltimoCapituloDesc(pageable);
         return pageObras.map(this::mapToDTO);
