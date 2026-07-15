@@ -190,7 +190,7 @@ public class UsuarioService {
             }
         }
 
-        // 7. Finalmente borramos al usuario (ahora está libre)
-        usuarioRepository.delete(usuario);
+        // 7. Finalmente borramos al usuario (ahora está libre) usando SOLO EL ID
+        usuarioRepository.deleteById(usuarioId);
     }
 }

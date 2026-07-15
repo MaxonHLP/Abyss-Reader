@@ -34,7 +34,7 @@ public interface HistorialRepository extends JpaRepository<Historial, Long> {
      * Elimina todos los historiales asociados a una obra.
      */
     void deleteAllByObraId(Long obraId);
-    @Modifying
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("DELETE FROM Historial h WHERE h.usuario.id = :usuarioId")
     void deleteAllByUsuarioId(@Param("usuarioId") Long usuarioId);
 }

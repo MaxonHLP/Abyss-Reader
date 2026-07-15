@@ -29,7 +29,7 @@ public interface GuardadoRepository extends JpaRepository<Guardado, Long> {
 
     /** Elimina todos los guardados de una obra (usado al eliminar la obra). */
     void deleteAllByObraId(Long obraId);
-    @Modifying
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("DELETE FROM Guardado g WHERE g.usuario.id = :usuarioId")
     void deleteAllByUsuarioId(@Param("usuarioId") Long usuarioId);
 }
