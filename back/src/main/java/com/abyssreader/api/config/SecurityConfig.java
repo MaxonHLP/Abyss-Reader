@@ -39,20 +39,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                // 1. CONFIGURACIÓN CORS INLINE
-                .cors(cors -> cors.configurationSource(request -> {
-                    CorsConfiguration config = new CorsConfiguration();
-                    config.setAllowedOrigins(Arrays.asList(
-                            "http://localhost:5173", 
-                            "https://abyss-reader.vercel.app"
-                    ));
-                    config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
-                    config.setAllowedHeaders(Arrays.asList("*"));
-                    config.setAllowCredentials(true);
-                    return config;
-                }))
-                
-                // 2. Deshabilitamos CSRF porque vamos a usar JWT que es inmune a esto si no se usan cookies
+                // 1. Deshabilitamos CSRF porque vamos a usar JWT que es inmune a esto si no se usan cookies
                 .csrf(csrf -> csrf.disable())
 
                 // Configuramos el manejo de sesión como STATELESS (sin estado)
