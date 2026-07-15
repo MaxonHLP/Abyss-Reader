@@ -135,6 +135,11 @@ public class UsuarioService {
      */
     @Transactional
     public void eliminarUsuarioDemo(Long usuarioId) {
+        // --- INICIO CÓDIGO COMENTADO PARA DEBUGGING ---
+        // El usuario solicitó comentar esta función para probar si la eliminación 
+        // causa conflictos con spring.jpa.hibernate.ddl-auto=create o la base de datos.
+        
+        /*
         Usuario usuario = usuarioRepository.findById(usuarioId)
             .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
@@ -177,9 +182,6 @@ public class UsuarioService {
                     }
 
                     List<Obra> obrasDelGrupo = obraRepository.findByGrupoId(grupoId);
-                    // Esto asume que el borrado normal de obras del grupo funciona bien,
-                    // o que sus capítulos no darán conflictos (idealmente en un esquema Demo
-                    // el grupo no tiene tantas obras con interacciones de 3ros).
                     obraRepository.deleteAll(obrasDelGrupo);
 
                     grupoRepository.deleteById(grupoId);
@@ -188,12 +190,15 @@ public class UsuarioService {
         }
 
         // 4. Relaciones indirectas (Obras, Capítulos, Grupos creados por el usuario)
-        // Se utiliza Bulk Delete validando que no tengan DataCore
         capituloRepository.deleteAllByCreadorId(usuarioId);
         obraRepository.deleteAllByCreadorId(usuarioId);
         grupoRepository.deleteAllByCreadorId(usuarioId);
 
         // 5. Finalmente borramos al usuario padre usando SOLO EL ID
         usuarioRepository.deleteById(usuarioId);
+        */
+        
+        System.out.println("TESTING: La función 'eliminarUsuarioDemo' ha sido comentada. Simulación exitosa para el ID: " + usuarioId);
+        // --- FIN CÓDIGO COMENTADO PARA DEBUGGING ---
     }
 }
