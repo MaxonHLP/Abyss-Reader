@@ -2,12 +2,7 @@ package com.abyssreader.api.task;
 
 import com.abyssreader.api.entity.Grupo;
 import com.abyssreader.api.entity.Usuario;
-import com.abyssreader.api.repository.GrupoRepository;
 import com.abyssreader.api.repository.UsuarioRepository;
-import com.abyssreader.api.repository.ObraRepository;
-import com.abyssreader.api.repository.CapituloRepository;
-import com.abyssreader.api.repository.ComentarioObraRepository;
-import com.abyssreader.api.repository.ComentarioCapituloRepository;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -15,10 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
-
+import com.abyssreader.api.service.UsuarioService;
 import java.util.List;
 
 /**
@@ -34,28 +26,19 @@ public class StartupMigrationTask {
     private static final Logger logger = LoggerFactory.getLogger(StartupMigrationTask.class);
 
     private final UsuarioRepository usuarioRepository;
-    private final GrupoRepository grupoRepository;
-    private final ObraRepository obraRepository;
-    private final CapituloRepository capituloRepository;
-    private final ComentarioObraRepository comentarioObraRepository;
-    private final ComentarioCapituloRepository comentarioCapituloRepository;
     private final EntityManager entityManager;
-
-    @Autowired
-    @Lazy
-    private StartupMigrationTask self;
+    private final UsuarioService usuarioService;
 
     @EventListener(ApplicationReadyEvent.class)
     public void cleanupZombiesOnStartup() {
         try {
-            self.executeMigration();
+            executeMigration();
         } catch (Exception e) {
             logger.error("Error no fatal durante la limpieza de zombies en el arranque: " + e.getMessage());
         }
     }
 
     @SuppressWarnings("unchecked")
-    @Transactional
     public void executeMigration() {
         logger.info("Verificando si existen registros soft-deleted (activo = false) para migrarlos a Hard Delete...");
 
@@ -65,14 +48,7 @@ public class StartupMigrationTask {
             logger.info("Se encontraron {} usuarios inactivos (soft-deleted). Procediendo a su eliminación física.", usuariosInactivos.size());
             for (Usuario usuario : usuariosInactivos) {
                 try {
-                    Long id = usuario.getId();
-                    obraRepository.removeMiembroFromAllObras(id);
-                    comentarioObraRepository.deleteAll(comentarioObraRepository.findByAutorId(id));
-                    comentarioCapituloRepository.deleteAll(comentarioCapituloRepository.findByAutorId(id));
-                    capituloRepository.deleteAll(capituloRepository.findByCreadorId(id));
-                    obraRepository.deleteAll(obraRepository.findByCreadorId(id));
-                    grupoRepository.deleteAll(grupoRepository.findByCreadorId(id));
-                    usuarioRepository.delete(usuario);
+                    usuarioService.eliminarUsuarioDemoCompleto(usuario.getId());
                 } catch (Exception e) {
                     logger.warn("StartupMigration: error al limpiar usuario inactivo id={}: {}", usuario.getId(), e.getMessage());
                 }
