@@ -15,7 +15,6 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.http.HttpMethod;
-import org.springframework.web.cors.CorsConfigurationSource;
 
 @Configuration
 @EnableWebSecurity
@@ -24,7 +23,6 @@ import org.springframework.web.cors.CorsConfigurationSource;
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
-    private final CorsConfigurationSource corsConfigurationSource;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -42,8 +40,8 @@ public class SecurityConfig {
                 // Deshabilitamos CSRF porque vamos a usar JWT que es inmune a esto si no se usan cookies
                 .csrf(csrf -> csrf.disable())
                 
-                // Habilitamos CORS usando el bean CorsConfigurationSource definido en CorsConfig
-                .cors(cors -> cors.configurationSource(corsConfigurationSource))
+                // Habilitamos CORS por defecto (tomará el bean de CorsConfig)
+                .cors(org.springframework.security.config.Customizer.withDefaults())
 
                 // Configuramos el manejo de sesión como STATELESS (sin estado)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
