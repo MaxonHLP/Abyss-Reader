@@ -15,6 +15,7 @@ import org.hibernate.annotations.SQLRestriction;
 @Table(name = "tipos")
 @SQLDelete(sql = "UPDATE tipos SET activo = false WHERE id = ?")
 @SQLRestriction("activo = true")
+@org.hibernate.annotations.BatchSize(size = 20)
 @Getter
 @Setter
 @NoArgsConstructor

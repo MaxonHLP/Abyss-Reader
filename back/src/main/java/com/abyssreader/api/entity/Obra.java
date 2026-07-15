@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import org.hibernate.annotations.BatchSize;
 
 @Entity
 @Table(name = "obras")
@@ -57,6 +58,7 @@ public class Obra extends BaseEntity {
             joinColumns = @JoinColumn(name = "obra_id"),
             inverseJoinColumns = @JoinColumn(name = "genero_id")
     )
+    @BatchSize(size = 20)
     private Set<Genero> generos = new HashSet<>();
 
     @ManyToMany(fetch = FetchType.LAZY)
@@ -65,6 +67,7 @@ public class Obra extends BaseEntity {
             joinColumns = @JoinColumn(name = "obra_id"),
             inverseJoinColumns = @JoinColumn(name = "miembro_id")
     )
+    @BatchSize(size = 20)
     private Set<Miembro> staff = new HashSet<>();
 
     /**

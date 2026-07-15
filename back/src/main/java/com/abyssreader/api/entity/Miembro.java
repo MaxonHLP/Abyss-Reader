@@ -13,6 +13,7 @@ import lombok.Setter;
 @Entity
 @Table(name = "miembros")
 @PrimaryKeyJoinColumn(name = "usuario_id")
+@org.hibernate.annotations.BatchSize(size = 20)
 @Getter
 @Setter
 @NoArgsConstructor
