@@ -15,6 +15,8 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.http.HttpMethod;
+import org.springframework.web.cors.CorsConfiguration;
+import java.util.Arrays;
 
 @Configuration
 @EnableWebSecurity
@@ -37,17 +39,30 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                // Deshabilitamos CSRF porque vamos a usar JWT que es inmune a esto si no se usan cookies
-                .csrf(csrf -> csrf.disable())
+                // 1. CONFIGURACIÓN CORS INLINE
+                .cors(cors -> cors.configurationSource(request -> {
+                    CorsConfiguration config = new CorsConfiguration();
+                    config.setAllowedOrigins(Arrays.asList(
+                            "http://localhost:5173", 
+                            "https://abyss-reader.vercel.app"
+                    ));
+                    config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
+                    config.setAllowedHeaders(Arrays.asList("*"));
+                    config.setAllowCredentials(true);
+                    return config;
+                }))
                 
-                // Habilitamos CORS por defecto (tomará el bean de CorsConfig)
-                .cors(org.springframework.security.config.Customizer.withDefaults())
+                // 2. Deshabilitamos CSRF porque vamos a usar JWT que es inmune a esto si no se usan cookies
+                .csrf(csrf -> csrf.disable())
 
                 // Configuramos el manejo de sesión como STATELESS (sin estado)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
                 // Configuramos los permisos de las rutas
                 .authorizeHttpRequests(authz -> authz
+                        // DEJAR PASAR EL PREFLIGHT (OPTIONS) SIEMPRE
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                        
                         // Permitir GET públicos a catálogos, lectura de capítulos, obras y comentarios
                         .requestMatchers(HttpMethod.GET, "/api/tipos", "/api/tipos/**", "/api/demografias", "/api/demografias/**", "/api/generos", "/api/generos/**", "/api/grupos", "/api/grupos/**", "/api/obras", "/api/obras/**", "/api/obra/**", "/api/miembros", "/api/miembros/**", "/api/catalogo", "/api/catalogo/**").permitAll()
                         // GET público de comentarios de capítulos
