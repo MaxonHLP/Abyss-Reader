@@ -21,6 +21,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -50,8 +53,11 @@ public class DemoCleanupTask {
     private final ComentarioObraRepository comentarioObraRepository;
     private final ComentarioCapituloRepository comentarioCapituloRepository;
 
+    @Autowired
+    @Lazy
+    private DemoCleanupTask self;
+
     @Scheduled(fixedDelay = 1800000)
-    @Transactional
     public void limpiarDemosExpirados() {
         LocalDateTime ahora = LocalDateTime.now();
         List<Usuario> expirados = usuarioRepository.findDemosExpirados(ahora);
@@ -66,7 +72,7 @@ public class DemoCleanupTask {
 
         for (Usuario usuario : expirados) {
             try {
-                eliminarUsuarioDemo(usuario);
+                self.eliminarUsuarioDemo(usuario.getId());
                 eliminados++;
             } catch (Exception e) {
                 logger.error("Demo Cleanup: error al eliminar usuario demo id={}: {}",
@@ -77,8 +83,10 @@ public class DemoCleanupTask {
         logger.info("Demo Cleanup: {} cuentas demo eliminadas exitosamente.", eliminados);
     }
 
-    private void eliminarUsuarioDemo(Usuario usuario) {
-        Long usuarioId = usuario.getId();
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void eliminarUsuarioDemo(Long usuarioId) {
+        Usuario usuario = usuarioRepository.findById(usuarioId)
+            .orElseThrow(() -> new RuntimeException("Usuario no encontrado: " + usuarioId));
 
         // 1. Eliminar comentarios del usuario (Hard Delete)
         List<ComentarioObra> comentariosObra = comentarioObraRepository.findByAutorId(usuarioId);
