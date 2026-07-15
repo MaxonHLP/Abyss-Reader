@@ -7,6 +7,8 @@ import lombok.Setter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.ArrayList;
 
 @Entity
 @Table(name = "usuarios")
@@ -81,4 +83,20 @@ public class Usuario extends BaseEntity {
      */
     @Column(nullable = false)
     private Integer capitulosCreados = 0;
+
+    // =========================================================================
+    // Cascada de borrado para proteger integridad referencial (Demo users)
+    // =========================================================================
+
+    @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Historial> historial = new ArrayList<>();
+
+    @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Guardado> guardados = new ArrayList<>();
+
+    @OneToMany(mappedBy = "autor", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ComentarioObra> comentariosObra = new ArrayList<>();
+
+    @OneToMany(mappedBy = "autor", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ComentarioCapitulo> comentariosCapitulo = new ArrayList<>();
 }

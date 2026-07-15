@@ -16,6 +16,8 @@ import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 
 import java.util.List;
 
@@ -39,10 +41,22 @@ public class StartupMigrationTask {
     private final ComentarioCapituloRepository comentarioCapituloRepository;
     private final EntityManager entityManager;
 
-    @SuppressWarnings("unchecked")
+    @Autowired
+    @Lazy
+    private StartupMigrationTask self;
+
     @EventListener(ApplicationReadyEvent.class)
-    @Transactional
     public void cleanupZombiesOnStartup() {
+        try {
+            self.executeMigration();
+        } catch (Exception e) {
+            logger.error("Error no fatal durante la limpieza de zombies en el arranque: " + e.getMessage());
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    @Transactional
+    public void executeMigration() {
         logger.info("Verificando si existen registros soft-deleted (activo = false) para migrarlos a Hard Delete...");
 
         // 1. Limpiar usuarios soft-deleted
