@@ -3,6 +3,7 @@ package com.abyssreader.api.repository;
 import com.abyssreader.api.entity.CapituloLeido;
 import com.abyssreader.api.entity.CapituloLeidoId;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -19,4 +20,8 @@ public interface CapituloLeidoRepository extends JpaRepository<CapituloLeido, Ca
 
     @Query("SELECT c.id.capituloId FROM CapituloLeido c WHERE c.id.usuarioId = :usuarioId AND c.id.capituloId IN :capitulosIds")
     List<Long> findLeidosByUsuarioAndCapitulos(@Param("usuarioId") Long usuarioId, @Param("capitulosIds") List<Long> capitulosIds);
+
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query("DELETE FROM CapituloLeido c WHERE c.id.usuarioId = :usuarioId")
+    void deleteAllByUsuarioId(@Param("usuarioId") Long usuarioId);
 }

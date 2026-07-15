@@ -22,4 +22,8 @@ public interface VistaTrackingRepository extends JpaRepository<VistaTracking, Lo
      * Elimina todas las vistas asociadas a un capítulo.
      */
     void deleteAllByCapituloId(Long capituloId);
+
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query("DELETE FROM VistaTracking v WHERE v.usuarioId = :usuarioId")
+    void deleteAllByUsuarioId(@Param("usuarioId") Long usuarioId);
 }

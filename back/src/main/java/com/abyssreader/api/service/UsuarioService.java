@@ -18,6 +18,9 @@ import com.abyssreader.api.repository.CapituloRepository;
 import com.abyssreader.api.repository.ObraRepository;
 import com.abyssreader.api.repository.GrupoRepository;
 import com.abyssreader.api.repository.MiembroRepository;
+import com.abyssreader.api.repository.CapituloLeidoRepository;
+import com.abyssreader.api.repository.VistaTrackingRepository;
+import com.abyssreader.api.repository.ObraLikeRepository;
 import com.abyssreader.api.entity.ComentarioObra;
 import com.abyssreader.api.entity.ComentarioCapitulo;
 import com.abyssreader.api.entity.Capitulo;
@@ -43,6 +46,9 @@ public class UsuarioService {
     private final ObraRepository obraRepository;
     private final GrupoRepository grupoRepository;
     private final MiembroRepository miembroRepository;
+    private final CapituloLeidoRepository capituloLeidoRepository;
+    private final VistaTrackingRepository vistaTrackingRepository;
+    private final ObraLikeRepository obraLikeRepository;
     private final PasswordEncoder passwordEncoder;
     private final StorageService storageService;
 
@@ -139,6 +145,9 @@ public class UsuarioService {
         // 1. Rompemos las dependencias de Lectura/Interacción (Evita errores PostgreSQL)
         historialRepository.deleteAllByUsuarioId(usuarioId);
         guardadoRepository.deleteAllByUsuarioId(usuarioId);
+        obraLikeRepository.deleteAllByUsuarioId(usuarioId);
+        capituloLeidoRepository.deleteAllByUsuarioId(usuarioId);
+        vistaTrackingRepository.deleteAllByUsuarioId(usuarioId);
 
         // 2. Eliminar comentarios del usuario
         List<ComentarioObra> comentariosObra = comentarioObraRepository.findByAutorId(usuarioId);
