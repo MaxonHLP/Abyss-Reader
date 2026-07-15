@@ -48,7 +48,8 @@ public class StartupMigrationTask {
             logger.info("Se encontraron {} usuarios inactivos (soft-deleted). Procediendo a su eliminación física.", usuariosInactivos.size());
             for (Usuario usuario : usuariosInactivos) {
                 try {
-                    usuarioService.eliminarUsuarioDemoCompleto(usuario.getId());
+                    usuarioService.eliminarUsuarioDemo(usuario.getId());
+                    logger.info("Usuario demo {} limpiado en inicio", usuario.getMail());
                 } catch (Exception e) {
                     logger.warn("StartupMigration: error al limpiar usuario inactivo id={}: {}", usuario.getId(), e.getMessage());
                 }

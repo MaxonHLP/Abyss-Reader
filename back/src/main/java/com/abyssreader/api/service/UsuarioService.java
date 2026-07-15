@@ -21,11 +21,7 @@ import com.abyssreader.api.repository.MiembroRepository;
 import com.abyssreader.api.repository.CapituloLeidoRepository;
 import com.abyssreader.api.repository.VistaTrackingRepository;
 import com.abyssreader.api.repository.ObraLikeRepository;
-import com.abyssreader.api.entity.ComentarioObra;
-import com.abyssreader.api.entity.ComentarioCapitulo;
-import com.abyssreader.api.entity.Capitulo;
 import com.abyssreader.api.entity.Obra;
-import com.abyssreader.api.entity.Grupo;
 import com.abyssreader.api.entity.Miembro;
 import com.abyssreader.api.util.Rol;
 import java.util.List;
@@ -138,37 +134,26 @@ public class UsuarioService {
      * por restricciones de Foreign Keys existentes.
      */
     @Transactional
-    public void eliminarUsuarioDemoCompleto(Long usuarioId) {
+    public void eliminarUsuarioDemo(Long usuarioId) {
         Usuario usuario = usuarioRepository.findById(usuarioId)
             .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
-        // 1. Rompemos las dependencias de Lectura/Interacción (Evita errores PostgreSQL)
+        if (!Boolean.TRUE.equals(usuario.getEsDemo())) {
+            throw new RuntimeException("Seguridad (Data Core): El usuario no es Demo. Operación cancelada.");
+        }
+
+        // 1. Rompemos las dependencias directas (hijos) del usuario (Evita errores PostgreSQL)
         historialRepository.deleteAllByUsuarioId(usuarioId);
         guardadoRepository.deleteAllByUsuarioId(usuarioId);
         obraLikeRepository.deleteAllByUsuarioId(usuarioId);
         capituloLeidoRepository.deleteAllByUsuarioId(usuarioId);
         vistaTrackingRepository.deleteAllByUsuarioId(usuarioId);
 
-        // 2. Eliminar comentarios del usuario
-        List<ComentarioObra> comentariosObra = comentarioObraRepository.findByAutorId(usuarioId);
-        comentarioObraRepository.deleteAll(comentariosObra);
+        // 2. Eliminar comentarios del usuario (Bulk Delete)
+        comentarioObraRepository.deleteAllByAutorId(usuarioId);
+        comentarioCapituloRepository.deleteAllByAutorId(usuarioId);
 
-        List<ComentarioCapitulo> comentariosCapitulo = comentarioCapituloRepository.findByAutorId(usuarioId);
-        comentarioCapituloRepository.deleteAll(comentariosCapitulo);
-
-        // 3. Eliminar capítulos creados por el usuario
-        List<Capitulo> capitulos = capituloRepository.findByCreadorId(usuarioId);
-        capituloRepository.deleteAll(capitulos);
-
-        // 4. Eliminar obras creadas por el usuario
-        List<Obra> obras = obraRepository.findByCreadorId(usuarioId);
-        obraRepository.deleteAll(obras);
-
-        // 5. Eliminar grupos creados por el usuario
-        List<Grupo> grupos = grupoRepository.findByCreadorId(usuarioId);
-        grupoRepository.deleteAll(grupos);
-
-        // 6. Si el usuario es miembro, además hay que limpiar staff
+        // 3. Pertenencia a grupos / Limpieza de relaciones de Miembro
         if (usuario instanceof Miembro miembro) {
             obraRepository.removeMiembroFromAllObras(miembro.getId());
             
@@ -192,6 +177,9 @@ public class UsuarioService {
                     }
 
                     List<Obra> obrasDelGrupo = obraRepository.findByGrupoId(grupoId);
+                    // Esto asume que el borrado normal de obras del grupo funciona bien,
+                    // o que sus capítulos no darán conflictos (idealmente en un esquema Demo
+                    // el grupo no tiene tantas obras con interacciones de 3ros).
                     obraRepository.deleteAll(obrasDelGrupo);
 
                     grupoRepository.deleteById(grupoId);
@@ -199,7 +187,13 @@ public class UsuarioService {
             }
         }
 
-        // 7. Finalmente borramos al usuario (ahora está libre) usando SOLO EL ID
+        // 4. Relaciones indirectas (Obras, Capítulos, Grupos creados por el usuario)
+        // Se utiliza Bulk Delete validando que no tengan DataCore
+        capituloRepository.deleteAllByCreadorId(usuarioId);
+        obraRepository.deleteAllByCreadorId(usuarioId);
+        grupoRepository.deleteAllByCreadorId(usuarioId);
+
+        // 5. Finalmente borramos al usuario padre usando SOLO EL ID
         usuarioRepository.deleteById(usuarioId);
     }
 }

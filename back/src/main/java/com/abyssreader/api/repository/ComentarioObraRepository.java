@@ -6,6 +6,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.data.jpa.repository.Modifying;
 
 public interface ComentarioObraRepository extends JpaRepository<ComentarioObra, Long> {
 
@@ -27,4 +28,8 @@ public interface ComentarioObraRepository extends JpaRepository<ComentarioObra, 
 
     /** Obtiene todos los comentarios creados por un autor específico. Usado para limpieza demo. */
     java.util.List<ComentarioObra> findByAutorId(Long autorId);
+
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query("DELETE FROM ComentarioObra c WHERE c.autor.id = :usuarioId")
+    void deleteAllByAutorId(@Param("usuarioId") Long usuarioId);
 }

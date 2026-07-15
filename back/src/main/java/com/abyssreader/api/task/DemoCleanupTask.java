@@ -53,7 +53,7 @@ public class DemoCleanupTask {
 
             for (Usuario usuario : expirados) {
                 try {
-                    usuarioService.eliminarUsuarioDemoCompleto(usuario.getId());
+                    usuarioService.eliminarUsuarioDemo(usuario.getId());
                     eliminados++;
                 } catch (Exception e) {
                     logger.error("Error al borrar usuario {}: {}", usuario.getId(), e.getMessage());

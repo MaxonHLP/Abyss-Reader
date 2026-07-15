@@ -2,6 +2,9 @@ package com.abyssreader.api.repository;
 
 import com.abyssreader.api.entity.Capitulo;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
@@ -26,4 +29,8 @@ public interface CapituloRepository extends JpaRepository<Capitulo, Long> {
 
     /** Obtiene todos los capítulos creados por un usuario específico. Usado para limpieza demo. */
     java.util.List<Capitulo> findByCreadorId(Long creadorId);
+
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query("DELETE FROM Capitulo c WHERE c.creadorId = :usuarioId AND c.dataCore = false")
+    void deleteAllByCreadorId(@Param("usuarioId") Long usuarioId);
 }

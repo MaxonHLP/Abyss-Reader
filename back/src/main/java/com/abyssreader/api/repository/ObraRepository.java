@@ -45,5 +45,9 @@ public interface ObraRepository extends JpaRepository<Obra, Long>, JpaSpecificat
 
     /** Obtiene todas las obras creadas por un usuario específico. Usado para limpieza demo. */
     List<Obra> findByCreadorId(Long creadorId);
+
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query("DELETE FROM Obra o WHERE o.creadorId = :usuarioId AND o.dataCore = false")
+    void deleteAllByCreadorId(@Param("usuarioId") Long usuarioId);
 }
 
