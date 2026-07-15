@@ -5,17 +5,19 @@ import com.abyssreader.api.dto.obra.ObraResponseDTO;
 import com.abyssreader.api.entity.*;
 import com.abyssreader.api.repository.*;
 import com.abyssreader.api.entity.Capitulo;
+import org.springframework.security.core.context.SecurityContextHolder;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
-
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 import com.abyssreader.api.exception.DemoLimitException;
 import com.abyssreader.api.exception.DemoIsolationException;
+import com.abyssreader.api.dto.obra.UltimoCapituloDTO;
+import java.util.Comparator;
 
 import java.util.List;
 import java.util.Set;
@@ -289,6 +291,14 @@ public class ObraService {
     }
 
     private ObraResponseDTO mapToDTO(Obra obra) {
+        List<UltimoCapituloDTO> ultimosCaps = obra.getCapitulos() != null 
+            ? obra.getCapitulos().stream()
+                .sorted(Comparator.comparing(Capitulo::getNumero).reversed())
+                .limit(2)
+                .map(c -> new UltimoCapituloDTO(c.getNumero(), c.getCreatedAt()))
+                .collect(Collectors.toList())
+            : null;
+
         return new ObraResponseDTO(
                 obra.getId(),
                 obra.getTitulo(),
@@ -303,7 +313,8 @@ public class ObraService {
                 obra.getGrupo() != null ? obra.getGrupo().getNombre() : null,
                 obra.getGeneros() != null ? obra.getGeneros().stream().map(Genero::getNombre).collect(Collectors.toList()) : null,
                 obra.getStaff() != null ? obra.getStaff().stream().map(Miembro::getId).collect(Collectors.toList()) : null,
-                obra.getStaff() != null ? obra.getStaff().stream().map(Miembro::getNombre).collect(Collectors.toList()) : null
+                obra.getStaff() != null ? obra.getStaff().stream().map(Miembro::getNombre).collect(Collectors.toList()) : null,
+                ultimosCaps
         );
     }
 }

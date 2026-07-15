@@ -73,10 +73,10 @@ public class Obra extends BaseEntity {
     /**
      * Relación bidireccional con Capitulo.
      * CascadeType.REMOVE + orphanRemoval garantizan que al borrar
-     * la Obra, Hibernate elimine todos sus capítulos (y sus páginas
      * por @ElementCollection) sin intervención manual.
      */
     @OneToMany(mappedBy = "obra", cascade = CascadeType.REMOVE, orphanRemoval = true, fetch = FetchType.LAZY)
+    @BatchSize(size = 20)
     private List<Capitulo> capitulos = new ArrayList<>();
 
     @Column(nullable = false)

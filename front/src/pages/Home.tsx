@@ -67,24 +67,13 @@ export default function Home() {
   // 4. Cargar recientes (con paginación)
   const fetchRecientes = (page: number) => {
     api.get(`/obras/recientes?page=${page}&size=20`)
-      .then(async res => {
+      .then(res => {
         const newObras = res.data.content || [];
         
-        const obrasConCapitulos = await Promise.all(newObras.map(async (obra: Obra) => {
-          try {
-            const capRes = await api.get(`/obras/${obra.id}/capitulos`);
-            const capitulos = capRes.data || [];
-            const ultimos2 = capitulos.sort((a: {numero: number}, b: {numero: number}) => b.numero - a.numero).slice(0, 2);
-            return { ...obra, ultimosCapitulos: ultimos2 };
-          } catch {
-            return { ...obra, ultimosCapitulos: [] };
-          }
-        }));
-
         if (page === 0) {
-          setObrasRecientes(obrasConCapitulos);
+          setObrasRecientes(newObras);
         } else {
-          setObrasRecientes(prev => [...prev, ...obrasConCapitulos]);
+          setObrasRecientes(prev => [...prev, ...newObras]);
         }
         setHasMoreRecientes(!res.data.last);
       })

@@ -27,5 +27,6 @@ public class ObraResponseDTO {
     private List<String> generosNombres;
     private List<Long> staffIds;
     private List<String> staffNombres;
+    private List<UltimoCapituloDTO> ultimosCapitulos;
 
 }
