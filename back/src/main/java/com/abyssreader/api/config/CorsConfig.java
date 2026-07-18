@@ -24,7 +24,7 @@ public class CorsConfig {
         ));
         
         // Escribimos los encabezados explícitamente. Usar "*" a veces falla con AllowCredentials
-        config.setAllowedHeaders(Arrays.asList("Origin", "Content-Type", "Accept", "Authorization", "X-Requested-With"));
+        config.setAllowedHeaders(Arrays.asList("Origin", "Content-Type", "Accept", "Authorization", "X-Requested-With", "X-Demo-Reinit-Token"));
         
         // Métodos permitidos
         config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "OPTIONS", "DELETE", "PATCH"));
