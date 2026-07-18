@@ -16,6 +16,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.http.HttpMethod;
 import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.security.config.Customizer;
 import java.util.Arrays;
 
 @Configuration
@@ -39,6 +40,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
+                .cors(Customizer.withDefaults())
                 // 1. Deshabilitamos CSRF porque vamos a usar JWT que es inmune a esto si no se usan cookies
                 .csrf(csrf -> csrf.disable())
 
