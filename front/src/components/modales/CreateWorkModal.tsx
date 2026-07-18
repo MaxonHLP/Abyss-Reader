@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import api from '../../services/api';
 import { useToastStore } from '../../store/useToastStore';
 import CustomSelect from '../ui/CustomSelect';
+import { useModalBackdrop } from './useModalBackdrop';
 
 interface CatalogItem {
   id: number;
@@ -41,6 +42,8 @@ const CreateWorkModal = ({ isOpen, groupId, onClose, onSuccess }: CreateWorkModa
   const [isLoading, setIsLoading] = useState(false);
   const [isFetchingCatalogs, setIsFetchingCatalogs] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useModalBackdrop(isOpen, onClose);
 
   // Cargar catálogos cuando el modal se abre
   useEffect(() => {
@@ -227,8 +230,14 @@ const CreateWorkModal = ({ isOpen, groupId, onClose, onSuccess }: CreateWorkModa
   const labelClass = 'text-abyss-text-titles-form-crear font-semibold mb-1';
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-abyss-filter-form-crear/50 backdrop-blur-sm z-50 transition-opacity">
-      <div className="bg-abyss-bg-form-crear p-8 rounded-2xl shadow-[0_10px_30px_rgba(0,0,0,0.5)] w-full max-w-lg border border-abyss-border-input-form-crear/30 transform scale-100 transition-transform max-h-[90vh] overflow-y-auto">
+    <div
+      className="fixed inset-0 flex items-center justify-center bg-abyss-filter-form-crear/50 backdrop-blur-sm z-50 transition-opacity"
+      onClick={onClose}
+    >
+      <div
+        className="bg-abyss-bg-form-crear p-8 rounded-2xl shadow-[0_10px_30px_rgba(0,0,0,0.5)] w-full max-w-lg border border-abyss-border-input-form-crear/30 transform scale-100 transition-transform max-h-[90vh] overflow-y-auto"
+        onClick={e => e.stopPropagation()}
+      >
         <h2 className="text-2xl font-bold text-abyss-text-titles-form-crear mb-6 text-center">
           Agregar Obra
         </h2>

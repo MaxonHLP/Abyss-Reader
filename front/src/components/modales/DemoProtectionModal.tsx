@@ -21,11 +21,15 @@ export default function DemoProtectionModal() {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm z-[9999] transition-opacity p-4">
+    <div
+      className="fixed inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm z-[9999] transition-opacity p-4"
+      onClick={() => setIsOpen(false)}
+    >
       <div 
         className="bg-[#0b0f19] p-8 rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.8)] w-full max-w-md border border-[#1a2235] flex flex-col items-center gap-6 text-center transform transition-transform"
         role="alertdialog"
         aria-modal="true"
+        onClick={e => e.stopPropagation()}
       >
         {/* Icono de prohibido animado */}
         <div className="w-20 h-20 rounded-full bg-red-500/10 flex items-center justify-center border border-red-500/20 shadow-[0_0_20px_rgba(239,68,68,0.2)]">

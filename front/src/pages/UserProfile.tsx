@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/useAuthStore';
 import api from '../services/api';
@@ -40,15 +40,81 @@ function formatFecha(isoString: string): string {
   });
 }
 
+/** Parsea el payload de un JWT sin verificar firma (solo para UI). */
+function parseJwtPayload(token: string): Record<string, unknown> | null {
+  try {
+    const base64Url = token.split('.')[1];
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    return JSON.parse(atob(base64));
+  } catch {
+    return null;
+  }
+}
+
+/** Retorna el motivo de expiración de sesión, o null si todo está ok. */
+type SesionEstado = 'TOKEN_EXPIRADO' | 'DEMO_EXPIRADO' | 'SIN_SESION' | null;
+function detectarEstadoSesion(token: string | null, esDemo?: boolean): SesionEstado {
+  if (!token) return 'SIN_SESION';
+  const payload = parseJwtPayload(token);
+  if (!payload) return 'TOKEN_EXPIRADO';
+  const exp = payload['exp'] as number | undefined;
+  if (!exp) return null;
+  const ahora = Math.floor(Date.now() / 1000);
+  if (ahora >= exp) {
+    return esDemo ? 'DEMO_EXPIRADO' : 'TOKEN_EXPIRADO';
+  }
+  return null;
+}
+
 // ── Componente principal ───────────────────────────────────────
 export default function UserProfile() {
   const { user, login, logout, token } = useAuthStore();
   const navigate = useNavigate();
 
+  // ── Detección de sesión expirada ─────────────────────────────
+  const [sesionEstado, setSesionEstado] = useState<SesionEstado>(null);
+  const [countdown, setCountdown] = useState(5);
+
+  const forzarLogout = useCallback((razon: SesionEstado) => {
+    setSesionEstado(razon);
+    logout();
+  }, [logout]);
+
+  useEffect(() => {
+    const estado = detectarEstadoSesion(token, user?.esDemo);
+    if (estado) {
+      forzarLogout(estado);
+      return;
+    }
+    // Verificar cada 30 segundos si el token expiró mientras el usuario está en la página
+    const interval = setInterval(() => {
+      const est = detectarEstadoSesion(token, user?.esDemo);
+      if (est) forzarLogout(est);
+    }, 30_000);
+    return () => clearInterval(interval);
+  }, [token, user?.esDemo, forzarLogout]);
+
+  // Countdown de redirección
+  useEffect(() => {
+    if (!sesionEstado) return;
+    if (countdown <= 0) {
+      navigate('/login');
+      return;
+    }
+    const t = setTimeout(() => setCountdown(c => c - 1), 1000);
+    return () => clearTimeout(t);
+  }, [sesionEstado, countdown, navigate]);
+
+  // ── Estado del perfil (todos los hooks ANTES del early return) ─────────
   const [tabActiva, setTabActiva] = useState<TabActiva>('historial');
   const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
   const [descripcionPerfil, setDescripcionPerfil] = useState<string | null>(null);
+  const [historial, setHistorial] = useState<HistorialItem[]>([]);
+  const [loadingHistorial, setLoadingHistorial] = useState(false);
+  const [guardados, setGuardados] = useState<GuardadoItem[]>([]);
+  const [loadingGuardados, setLoadingGuardados] = useState(false);
+  const [filtroEstado, setFiltroEstado] = useState<EstadoGuardado>('SIGUIENDO');
 
   const handleLogout = () => {
     logout();
@@ -58,6 +124,7 @@ export default function UserProfile() {
 
   // Cargar perfil completo del usuario
   useEffect(() => {
+    if (sesionEstado) return; // No hacer fetch si la sesión ya expiró
     api.get<{ nombre: string; mail: string; descripcion: string | null; fotoPerfil: string | null; rol: string }>('/usuarios/me')
       .then(res => {
         setDescripcionPerfil(res.data.descripcion);
@@ -73,36 +140,117 @@ export default function UserProfile() {
       })
       .catch(() => {});
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [sesionEstado]);
 
-  // Historial
-  const [historial, setHistorial] = useState<HistorialItem[]>([]);
-  const [loadingHistorial, setLoadingHistorial] = useState(false);
-
-  // Guardados
-  const [guardados, setGuardados] = useState<GuardadoItem[]>([]);
-  const [loadingGuardados, setLoadingGuardados] = useState(false);
-  const [filtroEstado, setFiltroEstado] = useState<EstadoGuardado>('SIGUIENDO');
   // Cargar historial al montar
   useEffect(() => {
+    if (sesionEstado) return;
     setLoadingHistorial(true);
     api.get<HistorialItem[]>('/historial')
       .then(res => setHistorial(res.data))
       .catch(err => console.error('Error cargando historial', err))
       .finally(() => setLoadingHistorial(false));
-  }, []);
+  }, [sesionEstado]);
 
   // Cargar guardados una sola vez al montar
   useEffect(() => {
+    if (sesionEstado) return;
     setLoadingGuardados(true);
     api.get<GuardadoItem[]>('/guardados')
       .then(res => setGuardados(res.data))
       .catch(err => console.error('Error cargando guardados', err))
       .finally(() => setLoadingGuardados(false));
-  }, []);
-
+  }, [sesionEstado]);
   // Filtro local de guardados (sin refetch)
   const guardadosFiltrados = guardados.filter(g => g.estado === filtroEstado);
+
+  // ── Banner de sesión expirada ────────────────────────────────
+  if (sesionEstado) {
+    const esDemo = sesionEstado === 'DEMO_EXPIRADO';
+    return (
+      <div
+        className="min-h-screen flex flex-col items-center justify-center p-6 relative overflow-hidden"
+        style={{ background: 'var(--color-abyss-bg-perfil)' }}
+      >
+        {/* Fondo decorativo */}
+        <div className="absolute inset-0 opacity-10 pointer-events-none select-none">
+          <img src={bgLog} alt="" className="w-full h-full object-cover" />
+        </div>
+
+        <div
+          className="relative z-10 flex flex-col items-center text-center max-w-md w-full rounded-2xl p-8 gap-6"
+          style={{
+            background: 'rgba(9, 21, 26, 0.85)',
+            border: esDemo ? '1px solid rgba(255, 100, 50, 0.35)' : '1px solid rgba(0, 235, 219, 0.25)',
+            boxShadow: esDemo
+              ? '0 0 40px rgba(255, 100, 50, 0.15)'
+              : '0 0 40px rgba(0, 235, 219, 0.1)',
+          }}
+        >
+          {/* Icono */}
+          <div
+            className="w-20 h-20 rounded-full flex items-center justify-center"
+            style={{
+              background: esDemo ? 'rgba(255,100,50,0.1)' : 'rgba(0,235,219,0.08)',
+              border: esDemo ? '1px solid rgba(255,100,50,0.3)' : '1px solid rgba(0,235,219,0.2)',
+            }}
+          >
+            <img src={cthulhuIcon} alt="Abyss" className="w-10 h-10 opacity-80" />
+          </div>
+
+          {/* Título */}
+          <div className="space-y-2">
+            <h1
+              className="text-2xl font-bold tracking-wide"
+              style={{ color: esDemo ? '#ff6432' : '#00EBDB' }}
+            >
+              {esDemo ? 'Tu sesión demo ha caído al abismo' : 'La oscuridad te ha reclamado'}
+            </h1>
+            <p className="text-sm leading-relaxed" style={{ color: 'rgba(200,220,230,0.7)' }}>
+              {esDemo
+                ? 'El tiempo de vida de tu cuenta de demostración ha expirado. Las cuentas demo tienen una duración de 1 hora para preservar los recursos del sistema.'
+                : 'Tu sesión ha expirado o fue cerrada desde otro dispositivo. Deberás iniciar sesión nuevamente para continuar tu travesía.'}
+            </p>
+          </div>
+
+          {/* Barra de countdown */}
+          <div className="w-full">
+            <div className="flex justify-between text-xs mb-1" style={{ color: 'rgba(200,220,230,0.5)' }}>
+              <span>Redirigiendo al inicio de sesión...</span>
+              <span>{countdown}s</span>
+            </div>
+            <div className="w-full h-1 rounded-full" style={{ background: 'rgba(255,255,255,0.1)' }}>
+              <div
+                className="h-1 rounded-full transition-all duration-1000"
+                style={{
+                  width: `${(countdown / 5) * 100}%`,
+                  background: esDemo
+                    ? 'linear-gradient(90deg, #ff6432, #ff9060)'
+                    : 'linear-gradient(90deg, #00EBDB, #0099cc)',
+                }}
+              />
+            </div>
+          </div>
+
+          {/* Botón inmediato */}
+          <button
+            onClick={() => navigate('/login')}
+            className="w-full py-3 rounded-xl font-bold text-sm transition-all duration-200 hover:brightness-110 active:scale-95"
+            style={{
+              background: esDemo
+                ? 'linear-gradient(135deg, rgba(255,100,50,0.2), rgba(255,100,50,0.1))'
+                : 'linear-gradient(135deg, rgba(0,235,219,0.2), rgba(0,153,204,0.1))',
+              border: esDemo ? '1px solid rgba(255,100,50,0.4)' : '1px solid rgba(0,235,219,0.4)',
+              color: esDemo ? '#ff6432' : '#00EBDB',
+            }}
+          >
+            Ir al login ahora
+          </button>
+        </div>
+      </div>
+    );
+  }
+
 
   const estadoLabels: Record<EstadoGuardado, string> = {
     SIGUIENDO: 'Siguiendo',

@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import api from '../../services/api';
 import type { CharacteristicType } from './CreateCharacteristicModal';
 import { editarCaracteristica, eliminarCaracteristica } from '../../services/masterService';
+import { useModalBackdrop } from './useModalBackdrop';
 
 interface Caracteristica {
   id: number;
@@ -20,12 +21,11 @@ const ManageCharacteristicsModal = ({ isOpen, type, onClose, onSuccess }: Manage
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Estados de edición In-line
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editingValue, setEditingValue] = useState('');
-
-  // Estado de confirmación de eliminación
   const [deletingItem, setDeletingItem] = useState<Caracteristica | null>(null);
+
+  useModalBackdrop(isOpen, onClose);
 
   const getEndpointType = (t: CharacteristicType): 'generos' | 'tipos' | 'demografias' => {
     if (t === 'genero') return 'generos';
@@ -110,8 +110,14 @@ const ManageCharacteristicsModal = ({ isOpen, type, onClose, onSuccess }: Manage
   if (!isOpen || !type) return null;
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-abyss-filter-form-crear/50 backdrop-blur-sm z-50 transition-opacity p-4">
-      <div className="bg-abyss-bg-form-crear p-8 rounded-2xl shadow-[0_10px_30px_rgba(0,0,0,0.5)] w-full max-w-lg border border-abyss-border-input-form-crear/30 flex flex-col max-h-[90vh]">
+    <div
+      className="fixed inset-0 flex items-center justify-center bg-abyss-filter-form-crear/50 backdrop-blur-sm z-50 transition-opacity p-4"
+      onClick={onClose}
+    >
+      <div
+        className="bg-abyss-bg-form-crear p-8 rounded-2xl shadow-[0_10px_30px_rgba(0,0,0,0.5)] w-full max-w-lg border border-abyss-border-input-form-crear/30 flex flex-col max-h-[90vh]"
+        onClick={e => e.stopPropagation()}
+      >
         
         {/* Cabecera */}
         <div className="flex justify-between items-center mb-6">

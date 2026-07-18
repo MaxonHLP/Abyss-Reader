@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import api from '../../services/api';
 import CustomSelect from '../ui/CustomSelect';
+import { useModalBackdrop } from './useModalBackdrop';
 
 interface CreateMemberModalProps {
   isOpen: boolean;
@@ -16,6 +17,8 @@ const CreateMemberModal = ({ isOpen, groupId, onClose, onSuccess }: CreateMember
   const [rol, setRol] = useState('MIEMBRO');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useModalBackdrop(isOpen, onClose);
 
   useEffect(() => {
     if (!isOpen) {
@@ -65,8 +68,14 @@ const CreateMemberModal = ({ isOpen, groupId, onClose, onSuccess }: CreateMember
   };
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-abyss-filter-form-crear/50 backdrop-blur-sm z-50 transition-opacity">
-      <div className="bg-abyss-bg-form-crear p-8 rounded-2xl shadow-[0_10px_30px_rgba(0,0,0,0.5)] w-full max-w-md border border-abyss-border-input-form-crear/30 transform scale-100 transition-transform">
+    <div
+      className="fixed inset-0 flex items-center justify-center bg-abyss-filter-form-crear/50 backdrop-blur-sm z-50 transition-opacity"
+      onClick={onClose}
+    >
+      <div
+        className="bg-abyss-bg-form-crear p-8 rounded-2xl shadow-[0_10px_30px_rgba(0,0,0,0.5)] w-full max-w-md border border-abyss-border-input-form-crear/30 transform scale-100 transition-transform"
+        onClick={e => e.stopPropagation()}
+      >
         <h2 className="text-2xl font-bold text-abyss-text-titles-form-crear mb-6 text-center">
           Crear Nuevo Miembro
         </h2>

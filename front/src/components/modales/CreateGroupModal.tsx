@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { crearGrupo } from '../../services/masterService';
 import { useToastStore } from '../../store/useToastStore';
+import { useModalBackdrop } from './useModalBackdrop';
 
 interface CreateGroupModalProps {
   isOpen: boolean;
@@ -19,6 +20,8 @@ const CreateGroupModal = ({ isOpen, onClose, onSuccess }: CreateGroupModalProps)
 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useModalBackdrop(isOpen, onClose);
 
   useEffect(() => {
     if (!isOpen) {
@@ -132,8 +135,14 @@ const CreateGroupModal = ({ isOpen, onClose, onSuccess }: CreateGroupModalProps)
   };
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-abyss-filter-form-crear/50 backdrop-blur-sm z-50 transition-opacity">
-      <div className="bg-abyss-bg-form-crear p-8 rounded-2xl shadow-[0_10px_30px_rgba(0,0,0,0.5)] w-full max-w-md border border-abyss-border-input-form-crear/30 transform scale-100 transition-transform max-h-[90vh] overflow-y-auto">
+    <div
+      className="fixed inset-0 flex items-center justify-center bg-abyss-filter-form-crear/50 backdrop-blur-sm z-50 transition-opacity"
+      onClick={onClose}
+    >
+      <div
+        className="bg-abyss-bg-form-crear p-8 rounded-2xl shadow-[0_10px_30px_rgba(0,0,0,0.5)] w-full max-w-md border border-abyss-border-input-form-crear/30 transform scale-100 transition-transform max-h-[90vh] overflow-y-auto"
+        onClick={e => e.stopPropagation()}
+      >
         <h2 className="text-2xl font-bold text-abyss-text-titles-form-crear mb-6 text-center">
           Crear Nuevo Grupo
         </h2>

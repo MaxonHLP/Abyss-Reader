@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { crearGenero, crearDemografia, crearTipo } from '../../services/masterService';
+import { useModalBackdrop } from './useModalBackdrop';
 
 export type CharacteristicType = 'genero' | 'demografia' | 'tipo' | null;
 
@@ -14,6 +15,8 @@ const CreateCharacteristicModal = ({ isOpen, type, onClose, onSuccess }: CreateC
   const [nombre, setNombre] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useModalBackdrop(isOpen, onClose);
 
   useEffect(() => {
     if (!isOpen) {
@@ -59,8 +62,14 @@ const CreateCharacteristicModal = ({ isOpen, type, onClose, onSuccess }: CreateC
   };
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-abyss-filter-form-crear/50 backdrop-blur-sm z-50 transition-opacity">
-      <div className="bg-abyss-bg-form-crear p-8 rounded-2xl shadow-[0_10px_30px_rgba(0,0,0,0.5)] w-full max-w-sm border border-abyss-border-input-form-crear/30 transform scale-100 transition-transform">
+    <div
+      className="fixed inset-0 flex items-center justify-center bg-abyss-filter-form-crear/50 backdrop-blur-sm z-50 transition-opacity"
+      onClick={onClose}
+    >
+      <div
+        className="bg-abyss-bg-form-crear p-8 rounded-2xl shadow-[0_10px_30px_rgba(0,0,0,0.5)] w-full max-w-sm border border-abyss-border-input-form-crear/30 transform scale-100 transition-transform"
+        onClick={e => e.stopPropagation()}
+      >
         <h2 className="text-2xl font-bold text-abyss-text-titles-form-crear mb-6 text-center">
           Crear Nuevo {displayTitle}
         </h2>
