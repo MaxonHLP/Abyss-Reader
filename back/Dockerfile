@@ -14,5 +14,6 @@ WORKDIR /app
 COPY --from=build /app/target/*.jar app.jar
 # Cloud Run inyecta su propio puerto, pero exponemos el 8080 por convención
 EXPOSE 8080
-# Comando de arranque
-ENTRYPOINT ["java", "-jar", "app.jar"]
+# -XX:MaxRAMPercentage=75.0: limita el heap de Java al 75% de la RAM del contenedor.
+# Sin esto, la JVM ignora el límite de Cloud Run y puede ser asesinada por OOM Kill.
+ENTRYPOINT ["java", "-XX:MaxRAMPercentage=75.0", "-jar", "app.jar"]

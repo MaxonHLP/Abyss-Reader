@@ -32,4 +32,14 @@ public interface ComentarioObraRepository extends JpaRepository<ComentarioObra, 
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("DELETE FROM ComentarioObra c WHERE c.autor.id = :usuarioId")
     void deleteAllByAutorId(@Param("usuarioId") Long usuarioId);
+
+    /**
+     * Desactiva (soft-delete) todos los comentarios de un autor en una sola sentencia.
+     * Reutiliza el campo 'eliminado' ya existente en la entidad para no duplicar
+     * el mecanismo de borrado lógico. Los comentarios siguen visibles en el árbol
+     * de respuestas como "[Comentario eliminado]" según la lógica del Frontend.
+     */
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query("UPDATE ComentarioObra c SET c.eliminado = true WHERE c.autor.id = :usuarioId")
+    void desactivarComentariosPorAutor(@Param("usuarioId") Long usuarioId);
 }

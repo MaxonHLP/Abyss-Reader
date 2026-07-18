@@ -30,4 +30,12 @@ public interface ComentarioCapituloRepository extends JpaRepository<ComentarioCa
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("DELETE FROM ComentarioCapitulo c WHERE c.autor.id = :usuarioId")
     void deleteAllByAutorId(@Param("usuarioId") Long usuarioId);
+
+    /**
+     * Desactiva (soft-delete) todos los comentarios de capítulo de un autor.
+     * Reutiliza el campo 'eliminado' ya existente para no duplicar el mecanismo.
+     */
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query("UPDATE ComentarioCapitulo c SET c.eliminado = true WHERE c.autor.id = :usuarioId")
+    void desactivarComentariosPorAutor(@Param("usuarioId") Long usuarioId);
 }

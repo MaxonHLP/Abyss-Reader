@@ -130,75 +130,51 @@ public class UsuarioService {
     }
 
     /**
-     * Eliminación en cascada manual para garantizar que PostgreSQL no falle
-     * por restricciones de Foreign Keys existentes.
+     * Desactiva una cuenta demo de forma segura (Soft Delete) y ejecuta un borrado
+     * lógico en cascada sobre todo el contenido generado por ese usuario.
+     *
+     * ORDEN DE EJECUCIÓN (respeta dependencias FK):
+     * 1. Poda de datos de consumo: historial, guardados, likes, tracking.
+     * 2. Comentarios de capítulo → eliminado=true (bulk update).
+     * 3. Comentarios de obra     → eliminado=true (bulk update).
+     * 4. Obras                   → activo=false   (bulk update, filtradas por @SQLRestriction).
+     * 5. Grupos                  → activo=false   (bulk update, filtrados por @SQLRestriction).
+     * 6. Usuario                 → activo=false   (bloquea el login vía DisabledException).
+     *
+     * @param usuarioId ID del usuario demo a desactivar.
      */
     @Transactional
-    public void eliminarUsuarioDemo(Long usuarioId) {
-        // --- INICIO CÓDIGO COMENTADO PARA DEBUGGING ---
-        // El usuario solicitó comentar esta función para probar si la eliminación 
-        // causa conflictos con spring.jpa.hibernate.ddl-auto=create o la base de datos.
-        
-        /*
+    public void eliminarUsuarioDemoCompleto(Long usuarioId) {
         Usuario usuario = usuarioRepository.findById(usuarioId)
-            .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+                .orElseThrow(() -> new RuntimeException("Demo Cleanup: Usuario con ID " + usuarioId + " no encontrado."));
 
         if (!Boolean.TRUE.equals(usuario.getEsDemo())) {
-            throw new RuntimeException("Seguridad (Data Core): El usuario no es Demo. Operación cancelada.");
+            throw new RuntimeException("Demo Cleanup: Seguridad activada. El usuario ID " + usuarioId + " no es Demo. Operación cancelada.");
         }
 
-        // 1. Rompemos las dependencias directas (hijos) del usuario (Evita errores PostgreSQL)
+        // 1. Poda de datos pesados y de bajo valor (no afectan la trazabilidad)
         historialRepository.deleteAllByUsuarioId(usuarioId);
         guardadoRepository.deleteAllByUsuarioId(usuarioId);
         obraLikeRepository.deleteAllByUsuarioId(usuarioId);
         capituloLeidoRepository.deleteAllByUsuarioId(usuarioId);
         vistaTrackingRepository.deleteAllByUsuarioId(usuarioId);
 
-        // 2. Eliminar comentarios del usuario (Bulk Delete)
-        comentarioObraRepository.deleteAllByAutorId(usuarioId);
-        comentarioCapituloRepository.deleteAllByAutorId(usuarioId);
+        // 2. Borrado lógico en cascada de comentarios (reutiliza campo 'eliminado')
+        //    Se ejecuta ANTES que obras/grupos porque las filas referencian esas entidades.
+        comentarioCapituloRepository.desactivarComentariosPorAutor(usuarioId);
+        comentarioObraRepository.desactivarComentariosPorAutor(usuarioId);
 
-        // 3. Pertenencia a grupos / Limpieza de relaciones de Miembro
-        if (usuario instanceof Miembro miembro) {
-            obraRepository.removeMiembroFromAllObras(miembro.getId());
-            
-            // Lógica de compatibilidad para el admin demo generado automáticamente
-            if (miembro.getRol() == Rol.MIEMBRO_ADMIN && miembro.getGrupo() != null) {
-                Long grupoId = miembro.getGrupo().getId();
+        // 3. Borrado lógico de obras (activo=false, protege dataCore)
+        //    @SQLRestriction en Obra las excluirá de todas las consultas JPA automáticamente.
+        obraRepository.desactivarObrasPorCreador(usuarioId);
 
-                boolean grupoEsExclusivamenteDemo = miembro.getGrupo().getMiembros()
-                        .stream()
-                        .allMatch(m -> Boolean.TRUE.equals(m.getEsDemo()));
+        // 4. Borrado lógico de grupos (activo=false, protege dataCore)
+        //    @SQLRestriction en Grupo los excluirá de todas las consultas JPA automáticamente.
+        grupoRepository.desactivarGruposPorCreador(usuarioId);
 
-                if (grupoEsExclusivamenteDemo) {
-                    List<Miembro> miembrosGrupo = miembro.getGrupo().getMiembros()
-                            .stream()
-                            .filter(m -> !m.getId().equals(miembro.getId()))
-                            .toList();
-
-                    for (Miembro otroMiembro : miembrosGrupo) {
-                        obraRepository.removeMiembroFromAllObras(otroMiembro.getId());
-                        miembroRepository.delete(otroMiembro);
-                    }
-
-                    List<Obra> obrasDelGrupo = obraRepository.findByGrupoId(grupoId);
-                    obraRepository.deleteAll(obrasDelGrupo);
-
-                    grupoRepository.deleteById(grupoId);
-                }
-            }
-        }
-
-        // 4. Relaciones indirectas (Obras, Capítulos, Grupos creados por el usuario)
-        capituloRepository.deleteAllByCreadorId(usuarioId);
-        obraRepository.deleteAllByCreadorId(usuarioId);
-        grupoRepository.deleteAllByCreadorId(usuarioId);
-
-        // 5. Finalmente borramos al usuario padre usando SOLO EL ID
-        usuarioRepository.deleteById(usuarioId);
-        */
-        
-        System.out.println("TESTING: La función 'eliminarUsuarioDemo' ha sido comentada. Simulación exitosa para el ID: " + usuarioId);
-        // --- FIN CÓDIGO COMENTADO PARA DEBUGGING ---
+        // 5. Desactivación lógica del usuario — bloquea el login instantáneamente
+        usuario.setActivo(false);
+        usuarioRepository.save(usuario);
     }
 }
+

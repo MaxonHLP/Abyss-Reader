@@ -13,16 +13,16 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 /**
- * Tarea programada que elimina (hard-delete) las cuentas demo efímeras vencidas.
+ * Tarea programada que desactiva (soft-delete) las cuentas demo efímeras vencidas.
  *
  * Se ejecuta cada 24 horas a las 5:20 AM. Para cada cuenta demo expirada:
- * 1. Elimina todos los historiales y guardados.
- * 2. Elimina todos los comentarios creados por este usuario (hard delete).
- * 3. Elimina todos los Capítulos creados por este usuario (hard delete).
- * 4. Elimina todas las Obras creadas por este usuario (hard delete).
- * 5. Elimina todos los Grupos creados por este usuario (hard delete).
- * 6. Si es MIEMBRO, limpia la tabla obra_staff.
- * 7. Elimina físicamente al usuario.
+ * 1. Marca el usuario como activo=false (bloquea el login).
+ * 2. Poda los datos pesados de bajo valor: historial, guardados, tracking.
+ * 3. CONSERVA: Obras, Comentarios y Grupos para mantener la trazabilidad.
+ *
+ * IMPORTANTE: Esta clase NO tiene @Transactional intencionalmente.
+ * Actúa como orquestador y delega la transacción a UsuarioService por usuario.
+ * Así, si un usuario falla, el error no hace rollback de los demás.
  */
 @Component
 @RequiredArgsConstructor
@@ -38,7 +38,7 @@ public class DemoCleanupTask {
     @Scheduled(cron = "0 20 5 * * ?")
     public void limpiarDemosExpirados() {
         logger.info("Iniciando limpieza diaria de cuentas demo expiradas...");
-        
+
         try {
             LocalDateTime ahora = LocalDateTime.now();
             List<Usuario> expirados = usuarioRepository.findDemosExpirados(ahora);
@@ -48,23 +48,24 @@ public class DemoCleanupTask {
                 return;
             }
 
-            logger.info("Demo Cleanup: se encontraron {} cuentas demo vencidas para eliminar.", expirados.size());
-            int eliminados = 0;
+            logger.info("Demo Cleanup: se encontraron {} cuentas demo vencidas para desactivar.", expirados.size());
+            int desactivados = 0;
 
             for (Usuario usuario : expirados) {
                 try {
-                    usuarioService.eliminarUsuarioDemo(usuario.getId());
-                    eliminados++;
+                    usuarioService.eliminarUsuarioDemoCompleto(usuario.getId());
+                    desactivados++;
+                    logger.info("Demo Cleanup: usuario ID {} desactivado exitosamente.", usuario.getId());
                 } catch (Exception e) {
-                    logger.error("Error al borrar usuario {}: {}", usuario.getId(), e.getMessage());
+                    logger.error("Error al desactivar usuario {}: {}", usuario.getId(), e.getMessage());
                 }
             }
 
-            logger.info("Demo Cleanup: {} cuentas demo eliminadas exitosamente.", eliminados);
+            logger.info("Demo Cleanup: {} cuentas demo desactivadas exitosamente.", desactivados);
         } catch (Exception globalError) {
             logger.error("Error general en el proceso de limpieza: {}", globalError.getMessage());
         }
-        
+
         logger.info("Limpieza diaria finalizada.");
     }
 }

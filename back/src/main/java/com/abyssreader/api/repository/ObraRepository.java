@@ -49,5 +49,14 @@ public interface ObraRepository extends JpaRepository<Obra, Long>, JpaSpecificat
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("DELETE FROM Obra o WHERE o.creadorId = :usuarioId AND o.dataCore = false")
     void deleteAllByCreadorId(@Param("usuarioId") Long usuarioId);
+
+    /**
+     * Desactiva (soft-delete) todas las obras de un creador en una sola sentencia SQL.
+     * Usado por el borrado lógico en cascada del usuario demo.
+     * No toca las obras con dataCore=true para proteger el contenido de exhibición.
+     */
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query("UPDATE Obra o SET o.activo = false WHERE o.creadorId = :usuarioId AND o.dataCore = false")
+    void desactivarObrasPorCreador(@Param("usuarioId") Long usuarioId);
 }
 

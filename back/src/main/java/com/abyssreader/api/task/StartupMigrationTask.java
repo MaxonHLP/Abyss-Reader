@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
-import com.abyssreader.api.service.UsuarioService;
 import java.util.List;
 
 /**
@@ -27,7 +26,6 @@ public class StartupMigrationTask {
 
     private final UsuarioRepository usuarioRepository;
     private final EntityManager entityManager;
-    private final UsuarioService usuarioService;
 
     @EventListener(ApplicationReadyEvent.class)
     public void cleanupZombiesOnStartup() {
@@ -42,20 +40,17 @@ public class StartupMigrationTask {
     public void executeMigration() {
         logger.info("Verificando si existen registros soft-deleted (activo = false) para migrarlos a Hard Delete...");
 
-        // 1. Limpiar usuarios soft-deleted
+        // 1. Verificar usuarios soft-deleted (activo = false)
+        // Bajo la nueva estrategia Soft Delete, activo=false ya ES el estado final:
+        // el usuario está bloqueado y sus datos pesados ya fueron podados por DemoCleanupTask.
+        // No se requiere ninguna acción adicional en el arranque.
         List<Usuario> usuariosInactivos = usuarioRepository.findByActivoFalse();
         if (!usuariosInactivos.isEmpty()) {
-            logger.info("Se encontraron {} usuarios inactivos (soft-deleted). Procediendo a su eliminación física.", usuariosInactivos.size());
-            for (Usuario usuario : usuariosInactivos) {
-                try {
-                    usuarioService.eliminarUsuarioDemo(usuario.getId());
-                    logger.info("Usuario demo {} limpiado en inicio", usuario.getMail());
-                } catch (Exception e) {
-                    logger.warn("StartupMigration: error al limpiar usuario inactivo id={}: {}", usuario.getId(), e.getMessage());
-                }
-            }
-            logger.info("Limpieza de usuarios inactivos finalizada.");
+            logger.info("Se encontraron {} usuarios con activo=false (soft-deleted). Ya están bloqueados correctamente.", usuariosInactivos.size());
+        } else {
+            logger.info("No se encontraron usuarios inactivos.");
         }
+
 
         // 2. Limpiar grupos soft-deleted — se usa native query para bypassear @SQLRestriction
         List<Grupo> gruposInactivos = entityManager

@@ -217,6 +217,10 @@ public class DemoService {
         admin.setGrupo(grupoSaved);
         Miembro adminSaved = miembroRepository.save(admin);
 
+        // Vincular el grupo al creador para que el borrado en cascada (Soft Delete) funcione
+        grupoSaved.setCreadorId(adminSaved.getId());
+        grupoRepository.save(grupoSaved);
+
         // 3. Crear un Miembro extra demo para el grupo
         String sufijoExtra = generarSufijo4Digitos();
         String nombreExtra = "MiembroDemo_" + sufijoExtra;

@@ -13,11 +13,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.server.ResponseStatusException;
 import com.abyssreader.api.exception.DemoLimitException;
 import com.abyssreader.api.exception.DemoIsolationException;
 import com.abyssreader.api.dto.obra.UltimoCapituloDTO;
-import java.util.Comparator;
 
 import java.util.List;
 import java.util.Set;
@@ -43,6 +41,7 @@ public class ObraService {
     private final HistorialRepository historialRepository;
     private final ObraLikeRepository obraLikeRepository;
     private final UsuarioRepository usuarioRepository;
+    private final CapituloRepository capituloRepository;
 
 
     @Transactional
@@ -291,13 +290,8 @@ public class ObraService {
     }
 
     private ObraResponseDTO mapToDTO(Obra obra) {
-        List<UltimoCapituloDTO> ultimosCaps = obra.getCapitulos() != null 
-            ? obra.getCapitulos().stream()
-                .sorted(Comparator.comparing(Capitulo::getNumero).reversed())
-                .limit(2)
-                .map(c -> new UltimoCapituloDTO(c.getNumero(), c.getCreatedAt()))
-                .collect(Collectors.toList())
-            : null;
+        // PostgreSQL devuelve solo los 2 últimos — cero capítulos cargados en memoria Java.
+        List<UltimoCapituloDTO> ultimosCaps = capituloRepository.findUltimosCapitulosByObraId(obra.getId());
 
         return new ObraResponseDTO(
                 obra.getId(),

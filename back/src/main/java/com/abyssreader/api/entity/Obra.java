@@ -12,9 +12,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import org.hibernate.annotations.BatchSize;
+import org.hibernate.annotations.SQLRestriction;
 
 @Entity
 @Table(name = "obras")
+@SQLRestriction("activo = true")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -81,6 +83,14 @@ public class Obra extends BaseEntity {
 
     @Column(nullable = false)
     private Boolean dataCore = false;
+
+    /**
+     * Soft-delete flag para el borrado lógico en cascada del usuario demo.
+     * Cuando activo=false, @SQLRestriction filtra esta obra de todas las consultas
+     * de catálogo, portada y búsqueda, sin eliminarla físicamente de la BD.
+     */
+    @Column(nullable = false)
+    private Boolean activo = true;
 
     /**
      * ID del usuario que creó esta obra.
