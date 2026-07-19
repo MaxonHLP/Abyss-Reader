@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import api from '../../services/api';
 import { useToastStore } from '../../store/useToastStore';
 import CustomSelect from '../ui/CustomSelect';
+import { useModalBackdrop } from './useModalBackdrop';
 
 interface CatalogItem {
   id: number;
@@ -41,6 +42,13 @@ const EditWorkModal = ({ isOpen, obraId, onClose, onSuccess }: EditWorkModalProp
   const [error, setError] = useState<string | null>(null);
   const [isDragOver, setIsDragOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useModalBackdrop(isOpen, () => {
+    if (!isLoading) {
+        if (portadaPreview) URL.revokeObjectURL(portadaPreview);
+        onClose();
+    }
+  });
 
   // Cargar datos de la obra y catálogos
   useEffect(() => {
@@ -266,8 +274,9 @@ const EditWorkModal = ({ isOpen, obraId, onClose, onSuccess }: EditWorkModalProp
   const generosDisponibles = generosCatalog.filter(g => !generosIds.includes(g.id));
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-abyss-filter-form-crear/50 backdrop-blur-sm z-50 transition-opacity">
-      <div className="bg-abyss-bg-form-crear p-8 rounded-2xl shadow-[0_10px_30px_rgba(0,0,0,0.5)] w-full max-w-2xl border border-abyss-border-input-form-crear/30 transform scale-100 transition-transform max-h-[90vh] overflow-y-auto flex flex-col gap-5">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-abyss-filter-form-crear/50 backdrop-blur-sm transition-opacity" onClick={handleClose} />
+      <div className="relative z-10 bg-abyss-bg-form-crear p-8 rounded-2xl shadow-[0_10px_30px_rgba(0,0,0,0.5)] w-full max-w-2xl border border-abyss-border-input-form-crear/30 transform scale-100 transition-transform max-h-[90vh] overflow-y-auto flex flex-col gap-5">
         <h2 className="text-2xl font-bold text-abyss-text-titles-form-crear mb-2 text-center">
           Editar Obra
         </h2>

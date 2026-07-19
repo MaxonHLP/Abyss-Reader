@@ -59,6 +59,9 @@ export default function Work() {
   const [deleteObraError, setDeleteObraError] = useState<string | null>(null);
   const [estadoGuardado, setEstadoGuardado] = useState<EstadoGuardado | ''>('');
   const [guardandoEstado, setGuardandoEstado] = useState(false);
+  // Estados de paginacion/orden de capitulos
+  const [mostrarTodosCapitulos, setMostrarTodosCapitulos] = useState(false);
+  const [ordenInverso, setOrdenInverso] = useState(true); // true = descendente (últimos primero)
   // Estado optimista de likes
   const [localLikes, setLocalLikes] = useState(0);
   const [liked, setLiked] = useState(false);
@@ -220,6 +223,15 @@ export default function Work() {
       setLikeLoading(false);
     }
   };
+
+  // Preparar capítulos para mostrar
+  const capitulosOrdenados = [...capitulos].sort((a, b) => {
+    return ordenInverso ? b.numero - a.numero : a.numero - b.numero;
+  });
+
+  const capitulosMostrados = mostrarTodosCapitulos 
+    ? capitulosOrdenados 
+    : capitulosOrdenados.slice(0, 8);
 
   if (error) return <div className="min-h-screen bg-abyss-bg-obras text-red-500 flex items-center justify-center p-8">{error}</div>;
   if (!obra) return <div className="min-h-screen bg-abyss-bg-obras text-white flex items-center justify-center p-8">Cargando...</div>;
@@ -462,15 +474,25 @@ export default function Work() {
       <div className="w-full max-w-4xl flex flex-col md:flex-row gap-6">
         {/* Card Capitulos */}
         <div className="w-full md:w-[60%] bg-abyss-bg-card-capitulos rounded-xl p-6 shadow-lg border border-abyss-border-card-gp flex flex-col gap-4">
-          <h2 className="text-2xl font-bold text-abyss-text-name-obra mb-2">Capítulos</h2>
+          <div className="flex justify-between items-center mb-2">
+            <h2 className="text-2xl font-bold text-abyss-text-name-obra">Capítulos</h2>
+            {capitulos.length > 0 && (
+              <button 
+                onClick={() => setOrdenInverso(!ordenInverso)}
+                className="text-xs font-bold px-3 py-1.5 bg-abyss-bg-selecs text-abyss-text-name-option border border-abyss-border-input rounded hover:brightness-110 transition shadow-sm uppercase tracking-wider"
+              >
+                Invertir Orden
+              </button>
+            )}
+          </div>
 
           <div className="flex flex-col gap-3">
-            {capitulos.length === 0 ? (
+            {capitulosMostrados.length === 0 ? (
               <p className="text-abyss-text-description-obra italic text-center py-6">
                 Esta obra aún no tiene capítulos.
               </p>
             ) : (
-              capitulos.map(cap => (
+              capitulosMostrados.map(cap => (
                 <button
                   key={cap.id ?? cap.numero}
                   onClick={() => handleVerCapitulo(cap.numero)}
@@ -496,6 +518,15 @@ export default function Work() {
                   </span>
                 </button>
               ))
+            )}
+            
+            {capitulos.length > 8 && !mostrarTodosCapitulos && (
+              <button
+                onClick={() => setMostrarTodosCapitulos(true)}
+                className="w-full mt-2 bg-abyss-bg-selecs text-abyss-text-name-option border border-abyss-border-input rounded py-3 font-bold hover:brightness-110 transition shadow-sm"
+              >
+                Ver todos ({capitulos.length - 8})
+              </button>
             )}
           </div>
         </div>

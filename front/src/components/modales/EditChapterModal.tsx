@@ -17,6 +17,7 @@ import { CSS } from '@dnd-kit/utilities';
 import api from '../../services/api';
 import { useToastStore } from '../../store/useToastStore';
 import CustomSelect from '../ui/CustomSelect';
+import { useModalBackdrop } from './useModalBackdrop';
 
 // ─── Interfaces ───────────────────────────────────────────────────────────────
 
@@ -196,8 +197,6 @@ const EditChapterModal = ({
     return () => { cancelled = true; };
   }, [capituloSeleccionado, obraNombre]);
 
-  if (!isOpen) return null;
-
   // ── Cerrar y limpiar todo ─────────────────────────────────────────────────────
   const handleClose = () => {
     if (isLoading) return;
@@ -210,6 +209,10 @@ const EditChapterModal = ({
     if (fileInputRef.current) fileInputRef.current.value = '';
     onClose();
   };
+
+  useModalBackdrop(isOpen, handleClose);
+
+  if (!isOpen) return null;
 
   // ── Selector de capítulo ──────────────────────────────────────────────────────
   const handleSelectCapitulo = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -406,8 +409,9 @@ const EditChapterModal = ({
 
   // ── Render ────────────────────────────────────────────────────────────────────
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-abyss-filter-form-crear/50 backdrop-blur-sm z-50 transition-opacity">
-      <div className="bg-abyss-bg-form-crear p-8 rounded-2xl shadow-[0_10px_30px_rgba(0,0,0,0.5)] w-full max-w-lg border border-abyss-border-input-form-crear/30 flex flex-col gap-5">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-abyss-filter-form-crear/50 backdrop-blur-sm transition-opacity" onClick={handleClose} />
+      <div className="relative z-10 bg-abyss-bg-form-crear p-8 rounded-2xl shadow-[0_10px_30px_rgba(0,0,0,0.5)] w-full max-w-lg border border-abyss-border-input-form-crear/30 flex flex-col gap-5">
 
         {/* ── Cabecera ─────────────────────────────────────────────────────── */}
         <div className="text-center">
