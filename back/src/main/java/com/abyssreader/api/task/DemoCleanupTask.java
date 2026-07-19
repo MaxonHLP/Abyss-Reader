@@ -33,9 +33,9 @@ public class DemoCleanupTask {
     private final UsuarioRepository usuarioRepository;
     private final UsuarioService usuarioService;
 
-    // Se ejecuta todos los días a las 5:20 AM
+    // Se ejecuta cada 3 horas
     // CRON: Segundos Minutos Horas Día_del_mes Mes Día_de_la_semana
-    @Scheduled(cron = "0 20 5 * * ?")
+    @Scheduled(cron = "0 0 */3 * * ?")
     public void limpiarDemosExpirados() {
         logger.info("Iniciando limpieza diaria de cuentas demo expiradas...");
 
