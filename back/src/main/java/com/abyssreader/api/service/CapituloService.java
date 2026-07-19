@@ -272,7 +272,7 @@ public class CapituloService {
                 capitulo.getCreatedAt(),
                 capitulo.getUpdatedAt(),
                 leido,
-                capitulo.getPaginasUrls(),
+                new java.util.ArrayList<>(capitulo.getPaginasUrls()),
                 anterior.map(Capitulo::getId).orElse(null),
                 siguiente.map(Capitulo::getId).orElse(null),
                 anterior.map(Capitulo::getNumero).orElse(null),
