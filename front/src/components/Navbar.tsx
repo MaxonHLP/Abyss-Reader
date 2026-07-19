@@ -32,7 +32,7 @@ export default function Navbar() {
     <>
     <nav className="w-full flex flex-row items-center justify-between px-4 md:px-6 py-2 md:py-0.5 shadow-md relative" style={{ backgroundColor: 'var(--color-abyss-navbar-bg)' }}>
       {/* Izquierda */}
-      <div className="flex flex-row items-center gap-2 md:gap-6">
+      <div className="flex flex-row items-center gap-2 md:gap-4 lg:gap-6">
         <img 
           src={iconCthulhu} 
           alt="Icono Cthulhu" 
@@ -41,11 +41,11 @@ export default function Navbar() {
         />
         <button 
           onClick={() => navigate(navInfo.url)}
-          className="font-bold cursor-pointer hover:brightness-110 transition uppercase tracking-wide text-[10px] sm:text-xs md:text-base whitespace-nowrap"
+          className="font-bold cursor-pointer hover:brightness-110 transition uppercase tracking-wide text-[10px] sm:text-xs md:text-sm lg:text-base whitespace-nowrap"
           style={{ color: 'var(--color-abyss-navbar-text)' }}
         >
-          <span className="md:hidden">{navInfo.textMobile}</span>
-          <span className="hidden md:inline">{navInfo.text}</span>
+          <span className="lg:hidden">{navInfo.textMobile}</span>
+          <span className="hidden lg:inline">{navInfo.text}</span>
         </button>
       </div>
 
