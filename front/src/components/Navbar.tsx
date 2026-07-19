@@ -68,7 +68,7 @@ export default function Navbar() {
             onChange={(e) => setSearch(e.target.value)}
             onKeyDown={handleSearch}
             placeholder="buscar ..."
-            className="hidden md:block rounded-full px-5 py-3 md:w-80 lg:w-96 outline-none font-medium pr-10 text-base shadow-inner transition-colors focus:ring-2 focus:ring-opacity-50 focus:ring-(--color-abyss-navbar-text-searchbar)"
+            className="hidden md:block rounded-full px-5 py-3 md:w-48 lg:w-72 xl:w-96 outline-none font-medium pr-10 text-base shadow-inner transition-colors focus:ring-2 focus:ring-opacity-50 focus:ring-(--color-abyss-navbar-text-searchbar)"
             style={{ 
               backgroundColor: 'var(--color-abyss-navbar-bg-searchbar)', 
               color: 'var(--color-abyss-navbar-text-searchbar)' 
